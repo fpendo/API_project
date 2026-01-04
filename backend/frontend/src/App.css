@@ -1,0 +1,59 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.App {
+  width: 100%;
+}
+
+.App-header {
+  padding: 2rem;
+}
+
+.App-header h1 {
+  margin-bottom: 1rem;
+  color: #646cff;
+}
+
+.role-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.role-button {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: 2px solid #646cff;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #646cff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.role-button:hover {
+  background-color: #646cff;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.role-button.selected {
+  background-color: #646cff;
+  color: white;
+  border-color: #535bf2;
+}
+
+.selected-role {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+  color: #888;
+}

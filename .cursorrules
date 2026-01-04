@@ -1,0 +1,60 @@
+# offsetX Project Rules
+
+## CRITICAL: Always Read Documentation First
+
+Before responding to ANY query or making ANY changes, you MUST read these files in order:
+
+1. **KNOWLEDGE_BASE.md** - Essential project context, flows, bugs, fixes, and implementation details
+2. **non-negotiables.md** - Development rules and constraints
+3. **plan.md** - Project plan with objectives, roles, flows, and architecture
+4. **progress.md** - Current status and what's been completed
+5. **implementation.md** - Implementation guide (if working on specific steps)
+
+## Project Context
+
+This is a UK nitrate/phosphate offset exchange platform (offsetX) with:
+- Smart contracts (Hardhat + Solidity)
+- Backend (FastAPI + SQLite)
+- Frontend (React + TypeScript)
+
+## Key Rules
+
+- Always update KNOWLEDGE_BASE.md when discovering bugs, fixing issues, or learning new flows
+- **MUST update progress.md after completing any work** (see Rule 8 in non-negotiables.md)
+- **MUST keep all documentation files synchronized** with code changes
+- Follow the rules in non-negotiables.md strictly
+- One step at a time - never skip ahead
+- Test before requesting approval
+- Wait for explicit approval before proceeding
+
+## Documentation Maintenance
+
+**After ANY work session, update these files in order:**
+
+1. **progress.md** - ALWAYS (current status, problems, solutions, change log)
+2. **KNOWLEDGE_BASE.md** - If bugs/flows/details discovered (update "Last Updated" date)
+3. **plan.md** - Only if architecture/specs changed significantly
+4. **implementation.md** - Only if steps completed/modified
+5. **README.md** - Only if setup/status changed
+
+**Reference Documentation (update as needed):**
+- `TROUBLESHOOTING.md` - Add new common issues
+- `QUICK_START.md` - Update if setup process changes
+- `RESTART_GUIDE.md` - Update if restart process changes
+
+**Historical Documentation (archive, don't update):**
+- `WHAT_HAPPENED.md`, `QUICK_FIX_SUMMARY.md`, etc. - These are snapshots, not living docs
+
+## When Starting a New Chat Session
+
+1. Read KNOWLEDGE_BASE.md FIRST to understand:
+   - Project structure and architecture
+   - Key flows and how they work
+   - Known bugs and their fixes
+   - Important implementation details
+   - Common issues and solutions
+
+2. Then read other documentation as needed
+
+This ensures continuity across chat sessions and prevents rediscovering known issues.
+
