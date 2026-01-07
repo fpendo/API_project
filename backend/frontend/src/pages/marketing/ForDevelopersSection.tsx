@@ -3,9 +3,9 @@ import { useRef } from 'react'
 
 const features = [
   'Browse available credits by catchment',
-  'Transparent pricing with 0.3-0.5% transaction fee',
-  'Purchase and receive blockchain certificates',
-  'Instant settlement and credit transfer',
+  'Instant pricing transparency',
+  'Purchase and receive digital certificates',
+  'Submit directly to planning applications',
   'QR-verified proof for planning officers',
 ]
 

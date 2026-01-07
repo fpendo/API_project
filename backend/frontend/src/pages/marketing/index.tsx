@@ -3,7 +3,6 @@ import { useRef } from 'react'
 import HeroSection from './HeroSection'
 import ProblemSection from './ProblemSection'
 import SolutionSection from './SolutionSection'
-import ForPlatformsSection from './ForPlatformsSection'
 import ForRegulatorsSection from './ForRegulatorsSection'
 import ForDevelopersSection from './ForDevelopersSection'
 import ForLandownersSection from './ForLandownersSection'
@@ -42,7 +41,6 @@ export default function LandingPage() {
         <HeroSection />
         <ProblemSection />
         <SolutionSection />
-        <ForPlatformsSection />
         <ForRegulatorsSection />
         <ForDevelopersSection />
         <ForLandownersSection />

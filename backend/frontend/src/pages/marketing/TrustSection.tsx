@@ -71,17 +71,17 @@ export default function TrustSection() {
                 <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
               </svg>
               <blockquote className="text-xl text-text-primary mb-6 leading-relaxed">
-                "Building our marketplace on this registry infrastructure saved us 18 months 
-                of development. The API handles all the complexity of credit verification, 
-                settlement, and regulatory compliance out of the box."
+                "NEMX provides the transparency and auditability we need to confidently manage 
+                nutrient neutrality across our catchments. The blockchain verification gives 
+                us and our stakeholders complete confidence in the integrity of every credit."
               </blockquote>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-accent-primary/20 flex items-center justify-center">
-                  <span className="text-xl">🏢</span>
+                  <span className="text-xl">👤</span>
                 </div>
                 <div>
-                  <div className="font-semibold text-text-primary">Platform Partner</div>
-                  <div className="text-sm text-text-muted">Environmental Exchange Operator</div>
+                  <div className="font-semibold text-text-primary">Environmental Lead</div>
+                  <div className="text-sm text-text-muted">Regional Planning Authority</div>
                 </div>
               </div>
             </div>

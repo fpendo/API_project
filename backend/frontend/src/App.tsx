@@ -1,6 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import LandingPage from './pages/marketing'
-import AppHome from './pages/Landing'
+import Landing from './pages/Landing'
 import Landowner from './pages/Landowner'
 import Regulator from './pages/Regulator'
 import Broker from './pages/Broker'
@@ -15,13 +14,7 @@ import Profile from './pages/Profile'
 function App() {
   return (
     <Routes>
-      {/* App role selector (original) */}
-      <Route path="/" element={<AppHome />} />
-      
-      {/* Marketing landing page */}
-      <Route path="/home" element={<LandingPage />} />
-      
-      {/* Role-specific dashboards */}
+      <Route path="/" element={<Landing />} />
       <Route path="/landowner" element={<Landowner />} />
       <Route path="/regulator" element={<Regulator />} />
       <Route path="/broker" element={<Broker />} />

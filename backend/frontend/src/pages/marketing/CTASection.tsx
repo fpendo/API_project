@@ -44,12 +44,12 @@ export default function CTASection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl lg:text-5xl font-bold text-text-primary mb-6">
-            Build on the Registry.<br />
-            <span className="gradient-text">Power Your Platform.</span>
+            Ready to Transform<br />
+            <span className="gradient-text">Environmental Compliance?</span>
           </h2>
           <p className="text-xl text-text-secondary mb-10 max-w-2xl mx-auto">
-            Whether you're a marketplace, broker, or consultant — our API gives you 
-            access to the UK's environmental credit infrastructure.
+            Join the regulators, developers, and landowners already using NEMX 
+            to unlock sustainable development.
           </p>
 
           {/* Email form */}
@@ -73,7 +73,7 @@ export default function CTASection() {
           </form>
 
           <p className="text-sm text-text-muted">
-            Free for supply-side users. API access for platforms.
+            No credit card required. Start with a free pilot.
           </p>
 
           {/* Quick contact options */}

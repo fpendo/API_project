@@ -15,10 +15,10 @@ export default function Navbar() {
   }, [])
 
   const navLinks = [
-    { label: 'For Platforms', href: '#platforms' },
-    { label: 'How It Works', href: '#features' },
+    { label: 'Features', href: '#features' },
+    { label: 'How It Works', href: '#how-it-works' },
     { label: 'Pricing', href: '#pricing' },
-    { label: 'API Docs', href: '#docs' },
+    { label: 'Documentation', href: '#docs' },
   ]
 
   return (

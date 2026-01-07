@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import AnimatedExchangeDemo from './AnimatedExchangeDemo'
+import { Link } from 'react-router-dom'
 
 export default function HeroSection() {
   return (
@@ -93,7 +93,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-primary/10 border border-accent-primary/20 mb-8"
           >
             <span className="w-2 h-2 rounded-full bg-accent-primary animate-pulse" />
-            <span className="text-sm text-accent-primary font-medium">The API for Environmental Credits</span>
+            <span className="text-sm text-accent-primary font-medium">Now live in 5 UK catchments</span>
           </motion.div>
 
           {/* Main headline */}
@@ -103,9 +103,9 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
           >
-            <span className="text-text-primary">The Registry Infrastructure</span>
+            <span className="text-text-primary">The Infrastructure for</span>
             <br />
-            <span className="gradient-text">Powering Environmental Markets</span>
+            <span className="gradient-text">Nature Recovery</span>
           </motion.h1>
 
           {/* Subheadline */}
@@ -115,8 +115,8 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl lg:text-2xl text-text-secondary max-w-3xl mx-auto mb-10 leading-relaxed"
           >
-            The credit registry and trading infrastructure that powers environmental 
-            marketplaces, brokers, and consultants. Plug in via API. Scale with us.
+            The complete platform for nutrient credit trading, environmental mitigation, 
+            and regulatory compliance. Built for regulators. Trusted by developers.
           </motion.p>
 
           {/* CTA buttons */}
@@ -144,7 +144,42 @@ export default function HeroSection() {
           </motion.div>
 
           {/* Product screenshot */}
-          <AnimatedExchangeDemo />
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="relative max-w-5xl mx-auto"
+          >
+            {/* Glow effect behind screenshot */}
+            <div className="absolute inset-0 bg-gradient-to-r from-accent-primary/20 via-transparent to-accent-secondary/20 blur-3xl" />
+            
+            {/* Screenshot placeholder - replace with actual screenshot */}
+            <div className="relative rounded-2xl overflow-hidden border border-border/50 shadow-2xl bg-background-surface">
+              <div className="aspect-[16/9] bg-gradient-to-br from-background-surface to-background-elevated flex items-center justify-center">
+                <div className="text-center p-8">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-accent-primary to-accent-secondary flex items-center justify-center">
+                    <span className="text-3xl font-bold text-background-deep">NX</span>
+                  </div>
+                  <p className="text-text-muted text-lg">Exchange Dashboard Screenshot</p>
+                  <p className="text-text-disabled text-sm mt-2">Replace with actual product screenshot</p>
+                </div>
+              </div>
+              
+              {/* Browser chrome mockup */}
+              <div className="absolute top-0 left-0 right-0 h-10 bg-background-elevated/50 backdrop-blur-sm flex items-center px-4 gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+                </div>
+                <div className="flex-1 mx-4">
+                  <div className="h-6 bg-background-surface rounded-md flex items-center px-3">
+                    <span className="text-xs text-text-disabled">app.nemx.io/exchange</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
 
           {/* Trust badges */}
           <motion.div
@@ -153,10 +188,10 @@ export default function HeroSection() {
             transition={{ duration: 0.6, delay: 0.8 }}
             className="mt-16"
           >
-            <p className="text-text-disabled text-sm uppercase tracking-widest mb-6">Powering platforms like</p>
+            <p className="text-text-disabled text-sm uppercase tracking-widest mb-6">Trusted by</p>
             <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12 opacity-60">
-              {/* Placeholder logos - replace with actual partner logos */}
-              {['Environmental Marketplaces', 'Offset Brokers', 'Environmental Consultants'].map((name) => (
+              {/* Placeholder logos - replace with actual client logos */}
+              {['Natural England', 'Environment Agency', 'Planning Authorities'].map((name) => (
                 <div key={name} className="px-6 py-3 rounded-lg bg-background-surface/30 border border-border/30">
                   <span className="text-text-muted text-sm font-medium">{name}</span>
                 </div>

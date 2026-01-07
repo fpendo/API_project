@@ -82,29 +82,63 @@ export default function ForRegulatorsSection() {
             {/* Glow effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 blur-3xl opacity-50" />
             
-            {/* Actual Screenshot */}
+            {/* Screenshot placeholder */}
             <div className="relative rounded-2xl overflow-hidden border border-emerald-500/20 shadow-2xl">
-              {/* Browser chrome mockup */}
-              <div className="bg-background-elevated/80 backdrop-blur-sm flex items-center px-4 py-3 gap-2 border-b border-border/50">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                </div>
-                <div className="flex-1 mx-4">
-                  <div className="h-6 bg-background-surface rounded-md flex items-center px-3">
-                    <span className="text-xs text-text-disabled">app.nemx.io/regulator</span>
+              <div className="aspect-[4/3] bg-gradient-to-br from-background-surface to-background-elevated">
+                {/* Mock UI */}
+                <div className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <span className="text-xl">⚖️</span>
+                    </div>
+                    <div>
+                      <div className="h-4 w-32 bg-text-primary/20 rounded" />
+                      <div className="h-3 w-24 bg-text-muted/20 rounded mt-1" />
+                    </div>
+                  </div>
+                  
+                  {/* Pending submissions */}
+                  <div className="mb-4">
+                    <div className="h-3 w-28 bg-text-muted/20 rounded mb-3" />
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-background-elevated/50 border border-border/30">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-amber-500/20" />
+                            <div>
+                              <div className="h-3 w-24 bg-text-primary/20 rounded" />
+                              <div className="h-2 w-16 bg-text-muted/20 rounded mt-1" />
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="px-3 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs">Approve</div>
+                            <div className="px-3 py-1 rounded bg-red-500/20 text-red-400 text-xs">Reject</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Stats row */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'Pending', value: '12', color: 'amber' },
+                      { label: 'Approved', value: '847', color: 'emerald' },
+                      { label: 'Capacity', value: '73%', color: 'blue' },
+                    ].map((stat) => (
+                      <div key={stat.label} className={`p-3 rounded-lg bg-${stat.color}-500/10 border border-${stat.color}-500/20`}>
+                        <div className="text-xl font-bold text-text-primary">{stat.value}</div>
+                        <div className="text-xs text-text-muted">{stat.label}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
               
-              {/* Screenshot image */}
-              <img 
-                src="/screenshots/regulator_dashboard.png" 
-                alt="NEMX Regulator Dashboard showing capacity analytics, approved schemes, and catchment data"
-                className="w-full h-auto"
-                style={{ imageRendering: 'auto', maxWidth: '100%' }}
-              />
+              {/* Label */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background-deep to-transparent">
+                <p className="text-center text-sm text-text-muted">Regulator Dashboard</p>
+              </div>
             </div>
           </motion.div>
         </div>

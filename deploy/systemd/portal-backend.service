@@ -1,0 +1,29 @@
+[Unit]
+Description=Portal Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/app/portal/backend
+Environment="PATH=/opt/app/portal/backend/venv/bin"
+ExecStart=/opt/app/portal/backend/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8080
+Restart=always
+RestartSec=5
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/app/portal
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=portal-backend
+
+[Install]
+WantedBy=multi-user.target
+

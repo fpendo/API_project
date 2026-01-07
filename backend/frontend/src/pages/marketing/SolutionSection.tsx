@@ -52,13 +52,13 @@ export default function SolutionSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-20"
         >
-          <span className="text-accent-primary text-sm font-semibold uppercase tracking-widest">How It Works</span>
+          <span className="text-accent-primary text-sm font-semibold uppercase tracking-widest">The Solution</span>
           <h2 className="text-4xl lg:text-5xl font-bold text-text-primary mt-4 mb-6">
-            The Credit Lifecycle
+            One Platform. Complete Clarity.
           </h2>
           <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-            Our infrastructure handles the complete credit journey — from creation 
-            through trading to retirement — with full auditability at every step.
+            NEMX connects landowners, developers, regulators, and planning authorities 
+            on a single, transparent marketplace backed by blockchain verification.
           </p>
         </motion.div>
 

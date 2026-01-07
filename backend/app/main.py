@@ -2,8 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+import logging
 from pathlib import Path
 from .routes import auth, submissions, regulator, landowner, accounts, exchange, operator, developer, planning, broker
+from .production_config import is_production, get_cors_origins, get_log_level
+
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, get_log_level()),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 # Load from backend/.env explicitly to ensure it's found regardless of working directory
@@ -65,21 +74,21 @@ all_loaded = True
 for var_name, var_value in env_vars.items():
     if var_name in required_vars:
         if var_value:
-            print(f"[OK] {var_name}: {var_value}")
+            print(f"✓ {var_name}: {var_value}")
         else:
-            print(f"[X] {var_name}: NOT SET (REQUIRED)")
+            print(f"✗ {var_name}: NOT SET (REQUIRED)")
             all_loaded = False
     else:
         if var_value:
-            print(f"[OK] {var_name}: {var_value}")
+            print(f"✓ {var_name}: {var_value}")
         else:
-            print(f"[-] {var_name}: Not set (using default or optional)")
+            print(f"○ {var_name}: Not set (using default or optional)")
 
 print("="*60)
 if all_loaded:
-    print("[OK] All required environment variables are loaded")
+    print("✓ All required environment variables are loaded")
 else:
-    print("[X] WARNING: Some required environment variables are missing!")
+    print("✗ WARNING: Some required environment variables are missing!")
     if env_path.exists():
         print(f"\nReading .env file directly from: {env_path}")
         with open(env_path, 'r', encoding='utf-8') as f:
@@ -94,13 +103,22 @@ else:
                     print(f"  Line {i}: {line.rstrip()}")
 print("="*60 + "\n")
 
-app = FastAPI()
+app = FastAPI(
+    title="NEMX API",
+    description="UK Nitrate & Phosphate Offset Exchange Platform API",
+    version="1.0.0",
+    docs_url="/docs" if not is_production() else None,  # Disable docs in production
+    redoc_url="/redoc" if not is_production() else None,
+)
 
 # Configure CORS for frontend integration
 # IMPORTANT: CORS middleware must be added BEFORE routers to handle preflight requests
+cors_origins = get_cors_origins()
+logger.info(f"CORS origins: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "*"],  # Explicitly allow frontend
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],

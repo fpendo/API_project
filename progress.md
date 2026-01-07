@@ -2,15 +2,15 @@
 
 > **Auto-updated document** tracking implementation progress, problems encountered, and solutions.
 
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-07
 
 ---
 
 ## Current Status
 
-**Current Phase:** Frontend Redesign + Backend Integration  
-**Current Step:** All services running with redesigned frontend  
-**Status:** ✅ Complete - Full redesign deployed!
+**Current Phase:** Production Deployment Preparation  
+**Current Step:** Portal & Deployment Scripts Complete  
+**Status:** ✅ Ready for VPS Deployment
 
 ---
 
@@ -199,6 +199,38 @@ _No steps currently in progress. Phase 0 complete!_
   - `backend/post_reset_fix.py` - Automated fix for post-reset address/key mismatch
 
 ## Change Log
+
+### 2026-01-07 - Portal & Online Deployment Infrastructure
+
+- **Portal Application Created:**
+  - New `portal/frontend/` - React + Tailwind login page and project dashboard
+  - New `portal/backend/` - FastAPI authentication with JWT tokens
+  - Deep space theme with animated backgrounds and glass-card components
+  - Project selector dashboard with cards for NEMX and future projects
+  
+- **NEMX Production Updates:**
+  - Added `backend/app/production_config.py` - Environment-aware configuration
+  - Updated `backend/app/main.py` with production CORS and logging
+  - Updated `backend/frontend/vite.config.ts` with `/nemx/` base path for production
+  - Added `backend/frontend/src/api/config.ts` for API URL configuration
+  
+- **Deployment Infrastructure:**
+  - `deploy/nginx/portal.conf` - Nginx reverse proxy configuration
+  - `deploy/systemd/portal-backend.service` - Portal API systemd unit
+  - `deploy/systemd/nemx-backend.service` - NEMX API systemd unit
+  - `deploy/systemd/hardhat.service` - Blockchain node systemd unit
+  - `deploy/deploy.sh` - Full deployment automation script
+  - `deploy/setup-vps.sh` - VPS initial setup script
+  - `deploy/backup.sh` - Database and config backup script
+  - `deploy/README.md` - Complete deployment guide
+  - `DEPLOYMENT_QUICKSTART.md` - 30-minute deployment guide
+
+- **Architecture:**
+  - Portal at root domain with login authentication
+  - NEMX accessible at `/nemx/` after portal login
+  - All services behind Nginx reverse proxy
+  - SSL via Let's Encrypt/Certbot
+  - Systemd for process management
 
 ### 2026-01-03 - Broker & Landowner Dashboard Enhancements
 
