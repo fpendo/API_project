@@ -9,8 +9,7 @@ import {
 } from '../components/ui'
 import { StatCard, StatsGrid, NotificationBanner } from '../components/domain'
 import { cn, formatGBP, formatCredits, creditsToTonnes } from '../lib/utils'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 const CATCHMENTS = ['SOLENT', 'THAMES', 'SEVERN', 'HUMBER', 'MERSEY', 'TEES', 'TYNE', 'WESSEX']
 const UNIT_TYPES = ['nitrate', 'phosphate']
 

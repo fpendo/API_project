@@ -5,8 +5,7 @@ import { AppShell, Section } from '../components/layout'
 import { Button, Card, Badge, getStatusVariant, Modal, Input, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableEmpty } from '../components/ui'
 import { StatCard, StatsGrid, NotificationBanner } from '../components/domain'
 import { cn, formatCredits } from '../lib/utils'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 const MOCK_LANDOWNER_ACCOUNT_ID = 1
 
 // Helper to replace legacy NFT terminology with Digital Certificate

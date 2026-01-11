@@ -3,8 +3,7 @@ import { AppShell } from '../components/layout'
 import { Button, Card, CardHeader, Badge } from '../components/ui'
 import { NotificationBanner } from '../components/domain'
 import { formatGBP } from '../lib/utils'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 
 interface Account {
   account_id: number

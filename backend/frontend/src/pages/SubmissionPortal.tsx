@@ -4,8 +4,7 @@ import { motion } from 'framer-motion'
 import { AppShell } from '../components/layout'
 import { Button, Card, CardHeader, Input, Select } from '../components/ui'
 import { NotificationBanner } from '../components/domain'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 const MOCK_LANDOWNER_ACCOUNT_ID = 1
 
 const CATCHMENTS = ['SOLENT', 'THAMES', 'SEVERN', 'HUMBER', 'MERSEY', 'TEES', 'TYNE', 'WESSEX']

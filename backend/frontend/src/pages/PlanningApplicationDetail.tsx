@@ -4,8 +4,7 @@ import { AppShell } from '../components/layout'
 import { Button, Card, CardHeader, Badge, getStatusVariant } from '../components/ui'
 import { NotificationBanner } from '../components/domain'
 import { formatCredits, formatTonnage } from '../lib/utils'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 
 interface ApplicationScheme {
   scheme_id: number

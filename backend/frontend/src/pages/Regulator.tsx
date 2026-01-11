@@ -4,8 +4,7 @@ import { AppShell, Section } from '../components/layout'
 import { Button, Card, Badge, getStatusVariant, Modal, Textarea, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, TableEmpty, Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui'
 import { StatCard, StatsGrid, NotificationBanner } from '../components/domain'
 import { formatCredits, formatTonnage } from '../lib/utils'
-
-const API_BASE_URL = 'http://localhost:8000'
+import { API_BASE_URL } from '../api/config'
 
 // Types - matches API response for /regulator/submissions
 interface Submission {
