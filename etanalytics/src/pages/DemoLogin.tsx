@@ -15,6 +15,9 @@ const DemoLogin = () => {
     sessionStorage.setItem('eta_demo_mode', 'true')
     sessionStorage.setItem('eta_demo_portal', selectedPortal)
     
+    // Clear disclaimer flag so popup shows each time entering demo
+    sessionStorage.removeItem('eta_demo_disclaimer_seen')
+    
     // Small delay for UX
     await new Promise(resolve => setTimeout(resolve, 500))
     
