@@ -22,8 +22,9 @@ import { ETFDatabaseProvider } from './store/ETFDatabaseContext'
 function App() {
   return (
     <ActivityProvider>
-      <ETFDatabaseProvider>
-        <RegisterProvider>
+      {/* RegisterProvider must come BEFORE ETFDatabaseProvider so registers are in localStorage first */}
+      <RegisterProvider>
+        <ETFDatabaseProvider>
           <Routes>
             {/* Public Pages */}
             <Route path="/" element={<LandingPage />} />
@@ -55,8 +56,8 @@ function App() {
             {/* Investor Portal */}
             <Route path="/investors" element={<InvestorDashboard />} />
           </Routes>
-        </RegisterProvider>
-      </ETFDatabaseProvider>
+        </ETFDatabaseProvider>
+      </RegisterProvider>
     </ActivityProvider>
   )
 }

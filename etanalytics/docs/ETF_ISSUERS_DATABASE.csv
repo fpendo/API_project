@@ -1,0 +1,55 @@
+Rank,Issuer,Parent Company,AUM (€bn),Market Share %,# ETFs,Domicile,HQ Country,Focus,Target Plan,Priority,Notes
+1,iShares,BlackRock,1050,40.8%,400+,Ireland,USA,Full range,Enterprise,High,Market leader - key reference customer
+2,Amundi ETF,Amundi,315,12.3%,300+,Luxembourg/Ireland,France,Full range,Enterprise,High,Acquired Lyxor - growing fast
+3,Xtrackers,DWS Group,270,10.5%,200+,Ireland/Luxembourg,Germany,Full range,Enterprise,High,Strong institutional focus
+4,Vanguard,Vanguard Group,180,7.0%,80+,Ireland,USA,Low-cost passive,Enterprise,High,Investor-focused culture
+5,UBS ETF,UBS,120,4.7%,100+,Ireland/Luxembourg,Switzerland,Full range,Professional,Medium,Strong Swiss/EU distribution
+6,Invesco,Invesco,95,3.7%,130+,Ireland,USA,Thematic/Factor,Professional,High,Innovative product range
+7,SPDR,State Street,85,3.3%,70+,Ireland,USA,Core/Sectors,Professional,Medium,Strong institutional brand
+8,HSBC ETF,HSBC,55,2.1%,50+,Ireland,UK,Asia/EM focus,Professional,Medium,Asian market expertise
+9,BNP Paribas Easy,BNP Paribas,50,1.9%,80+,Luxembourg,France,ESG/Thematic,Professional,Medium,Strong ESG focus
+10,Lyxor (legacy),Amundi,45,1.8%,100+,Luxembourg,France,Various,Professional,Low,Merged into Amundi
+11,WisdomTree,WisdomTree,40,1.6%,90+,Ireland,USA,Thematic/Commodity,Professional,High,Innovative thematics
+12,JPMorgan ETF,JPMorgan,35,1.4%,40+,Ireland,USA,Active ETFs,Professional,High,Fast-growing active
+13,Legal & General,L&G,30,1.2%,30+,Ireland,UK,Core/ESG,Professional,Medium,UK pension focus
+14,Franklin Templeton,Franklin Templeton,28,1.1%,50+,Ireland,USA,Active/Fixed Income,Professional,Medium,Active management heritage
+15,Fidelity,Fidelity International,25,1.0%,25+,Ireland,UK/USA,Active/Factor,Professional,High,Expanding rapidly
+16,VanEck,VanEck,22,0.9%,40+,Ireland,USA,Thematic/Crypto,Professional,High,Innovative thematics
+17,Global X,Mirae Asset,18,0.7%,35+,Ireland,South Korea,Thematic,Professional,High,Growing European presence
+18,HANetf,HANetf,15,0.6%,60+,Ireland,UK,White-label,Professional,High,Multiple sub-advisors
+19,Ossiam,Natixis,12,0.5%,30+,Luxembourg,France,Quantitative,Starter,Medium,Quant strategies
+20,Think ETF,Think Capital,10,0.4%,20+,Netherlands,Netherlands,Dutch market,Starter,Medium,Local Dutch leader
+21,First Trust,First Trust,9,0.4%,25+,Ireland,USA,Thematic/Sector,Starter,Medium,US heritage
+22,Tabula,Tabula,8,0.3%,15+,Ireland,UK,Fixed Income,Starter,Medium,Bond innovation
+23,Rize ETF,ARK (partner),7,0.3%,12+,Ireland,UK,Thematic,Starter,High,Disruptive themes
+24,GraniteShares,GraniteShares,6,0.2%,20+,Ireland,UK,Leveraged/Commodity,Starter,Low,Leveraged products
+25,Leverage Shares,Leverage Shares,5,0.2%,100+,Ireland,UK,Leveraged single stock,Starter,Low,Retail focused
+26,ETC Group,ETC Group,5,0.2%,8+,Germany,Germany,Crypto,Starter,Medium,Crypto focus
+27,21Shares,21Shares,4,0.2%,20+,Switzerland,Switzerland,Crypto,Starter,Medium,Crypto leader
+28,CoinShares,CoinShares,4,0.2%,15+,Jersey,UK,Crypto,Starter,Low,Crypto focused
+29,Sprott,Sprott,3,0.1%,8+,Ireland,Canada,Precious metals,Starter,Low,Commodity focus
+30,LGIM (L&G),Legal & General,3,0.1%,10+,Ireland,UK,Core,Starter,Low,Subsidiary
+31,abrdn,abrdn,3,0.1%,8+,Ireland,UK,Factor/ESG,Starter,Medium,Expanding
+32,Principal,Principal,2,0.1%,5+,Ireland,USA,Factor,Starter,Low,New entrant
+33,Expat ETF,Expat Asset,2,0.1%,11+,Bulgaria,Bulgaria,CEE markets,Starter,Low,Niche regional
+34,Haim Israel ETF,Various,1.5,0.1%,5+,Ireland,Israel,Israel exposure,Starter,Low,Niche
+35,Saturna Capital,Saturna,1,0.0%,3+,Ireland,USA,Sharia/ESG,Starter,Low,Niche religious
+36,ICAV (various),Multiple,1,0.0%,Various,Ireland,Various,White-label,Starter,Low,Various small
+37,Deka ETF,DekaBank,8,0.3%,30+,Germany,Germany,German retail,Starter,Medium,Sparkassen network
+38,ComStage (Lyxor),Amundi,5,0.2%,40+,Luxembourg,Germany,Legacy German,Low,Low,Merged into Lyxor
+39,iShares iBonds,BlackRock,4,0.2%,20+,Ireland,USA,Target maturity,Enterprise,Low,Part of iShares
+40,BNY Mellon ETF,BNY Mellon,2,0.1%,5+,Ireland,USA,New entrant,Starter,Medium,Growing
+--- NEW ENTRANTS (2024-2027) ---,,,,,,,,,,,
+NEW,Dimensional,Dimensional Fund,0,0.0%,0,Ireland,USA,Factor/Value,Professional,High,Launching 2025-26
+NEW,ARK Invest EU,ARK Invest,0,0.0%,0,Ireland,USA,Innovation,Professional,High,Expanding to EU
+NEW,Avantis,American Century,0,0.0%,0,Ireland,USA,Factor,Starter,Medium,New entrant 2026
+NEW,Robeco ETF,Robeco,0,0.0%,0,Ireland,Netherlands,Sustainable,Professional,High,ETF expansion
+NEW,M&G ETF,M&G,0,0.0%,0,Ireland,UK,Active,Starter,Medium,New to ETFs
+NEW,Goldman Sachs ETF,Goldman Sachs,5,0.2%,10+,Ireland,USA,Active/Factor,Professional,High,Rapid expansion
+NEW,Morgan Stanley ETF,Morgan Stanley,2,0.1%,5+,Ireland,USA,Active,Professional,Medium,Building range
+NEW,T. Rowe Price EU,T. Rowe Price,1,0.0%,3+,Ireland,USA,Active,Starter,Medium,Entering EU
+NEW,Capital Group EU,Capital Group,0,0.0%,0,Ireland,USA,Active,Professional,Medium,Planning EU ETFs
+NEW,Baillie Gifford ETF,Baillie Gifford,0,0.0%,0,Ireland,UK,Active growth,Professional,High,Expected launch
+
+
+

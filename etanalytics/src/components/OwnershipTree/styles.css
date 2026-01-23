@@ -1,0 +1,244 @@
+/* Ownership Tree Container */
+.ownership-tree-container {
+  width: 100%;
+  height: 600px;
+  background: linear-gradient(135deg, #0a0e1a 0%, #0f1420 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* React Flow overrides */
+.react-flow__background {
+  background: #0a0e1a;
+}
+
+.react-flow__minimap {
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(59, 130, 246, 0.1);
+}
+
+.react-flow__minimap-node {
+  fill: #3b82f6;
+  stroke: none;
+  rx: 4;
+  ry: 4;
+}
+
+.react-flow__controls {
+  background: rgba(15, 18, 24, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.react-flow__controls-button {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  width: 32px;
+  height: 32px;
+}
+
+.react-flow__controls-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+/* Handle styling */
+.tree-handle {
+  width: 12px !important;
+  height: 12px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Edge label styling */
+.edge-label {
+  font-size: 10px;
+  backdrop-filter: blur(8px);
+}
+
+/* Custody node styling */
+.custody-node {
+  cursor: grab;
+}
+
+.custody-node:active {
+  cursor: grabbing;
+}
+
+/* Selection styling */
+.react-flow__node.selected .custody-node {
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Edge hover effect */
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke-width: 4;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Animation for new nodes */
+@keyframes nodeAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.custody-node {
+  animation: nodeAppear 0.4s ease-out;
+}
+
+/* Pulse animation for terminal nodes */
+@keyframes terminalPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+
+.custody-node.terminal {
+  animation: terminalPulse 2s infinite;
+}
+
+/* Gradient borders */
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Custom scrollbar */
+.ownership-tree-container ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ownership-tree-container ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.ownership-tree-container ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.ownership-tree-container ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Tree controls */
+.tree-controls {
+  bottom: 20px !important;
+  left: 20px !important;
+  top: auto !important;
+}
+
+/* Tree minimap */
+.tree-minimap {
+  bottom: 20px !important;
+  right: 20px !important;
+  top: auto !important;
+  left: auto !important;
+  width: 160px !important;
+  height: 100px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ownership-tree-container {
+    height: 400px;
+  }
+  
+  .tree-minimap {
+    display: none;
+  }
+}
+
+/* Loading state */
+.tree-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.tree-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty state */
+.tree-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6b7280;
+}
+
+.tree-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* Focus indicators for accessibility */
+.custody-node:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 4px;
+}
+
+/* Print styles */
+@media print {
+  .ownership-tree-container {
+    background: white !important;
+    border: 1px solid #ccc;
+  }
+  
+  .tree-controls,
+  .tree-minimap {
+    display: none !important;
+  }
+}
+
