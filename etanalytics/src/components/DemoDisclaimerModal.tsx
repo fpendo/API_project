@@ -6,11 +6,10 @@ const DemoDisclaimerModal = () => {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    // Check if user is in demo mode and hasn't seen disclaimer
-    const isDemoMode = sessionStorage.getItem('eta_demo_mode') === 'true'
+    // Show disclaimer on first visit to any portal (per session)
     const hasSeenDisclaimer = sessionStorage.getItem('eta_demo_disclaimer_seen') === 'true'
     
-    if (isDemoMode && !hasSeenDisclaimer) {
+    if (!hasSeenDisclaimer) {
       // Small delay so modal appears after portal loads
       setTimeout(() => setIsOpen(true), 500)
     }
@@ -59,19 +58,19 @@ const DemoDisclaimerModal = () => {
 
               {/* Content */}
               <h2 className="text-2xl font-bold text-white text-center mb-4">
-                Demo Mode Active
+                Important Notice
               </h2>
               
               <div className="space-y-4 text-gray-300 text-center">
                 <p className="text-lg">
-                  While the <span className="text-white font-semibold">client entities displayed are real organisations</span>, 
-                  all register data, shareholdings, and analytics shown in this demo are <span className="text-white font-semibold">simulated for demonstration purposes only</span>.
+                  Although the <span className="text-white font-semibold">clients shown are real organisations</span>, 
+                  all share register data, shareholdings, and ownership analytics displayed are <span className="text-accent-400 font-semibold">completely fabricated for demonstration purposes</span>.
                 </p>
                 
                 <div className="p-4 bg-dark-800/50 rounded-xl border border-accent-500/20">
                   <p className="text-sm text-gray-400">
-                    This demo showcases the platform's capabilities using realistic but fictional data. 
-                    For live production access with real register data, please contact our team.
+                    This platform showcases our capabilities using simulated data that reflects realistic patterns and structures. 
+                    For production access with actual register data, please contact our team.
                   </p>
                 </div>
               </div>
