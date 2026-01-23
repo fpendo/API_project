@@ -399,7 +399,11 @@ const MarketTab = () => (
 )
 
 // Financials Tab Component
-const FinancialsTab = () => (
+const FinancialsTab = () => {
+  // Format currency in millions
+  const formatMillions = (value: number) => `£${(value / 1000).toFixed(1)}M`
+  
+  return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -409,20 +413,24 @@ const FinancialsTab = () => (
     <div className="card-glass rounded-2xl p-8">
       <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
         <TrendingUp className="w-6 h-6 text-primary-400" />
-        5-Year ARR Projections (£'000)
+        5-Year ARR Projections
       </h2>
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={arrProjections}>
             <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
             <XAxis dataKey="year" stroke="#9CA3AF" />
-            <YAxis stroke="#9CA3AF" />
+            <YAxis 
+              stroke="#9CA3AF"
+              tickFormatter={formatMillions}
+            />
             <Tooltip
               contentStyle={{
                 backgroundColor: '#1F2937',
                 border: '1px solid #374151',
                 borderRadius: '8px'
               }}
+              formatter={(value: number) => formatMillions(value)}
             />
             <Area
               type="monotone"
@@ -626,7 +634,8 @@ const FinancialsTab = () => (
       </div>
     </div>
   </motion.div>
-)
+  )
+}
 
 // Metrics Tab Component
 const MetricsTab = () => (
