@@ -19,7 +19,8 @@ import {
   Building2,
   Calendar,
   Shield,
-  Zap
+  Zap,
+  Star
 } from 'lucide-react'
 import {
   LineChart,
@@ -727,12 +728,175 @@ const MetricsTab = () => (
 )
 
 // Team Tab Component
-const TeamTab = () => (
+const TeamTab = () => {
+  // MD Compensation Package
+  const mdPackage = {
+    baseEquity: 5.0,
+    milestone1Equity: 2.5,  // At £2m revenue
+    milestone2Equity: 2.5,  // At £5m revenue
+    maxEquity: 10.0,
+    commissionRate: 17.5,
+    monthlyStipend: 1000,
+    exitValuations: {
+      conservative: 34000000,  // £34M
+      base: 77000000,          // £77M
+      aggressive: 150000000    // £150M
+    }
+  }
+
+  // Year-by-year earnings projections for MD
+  const mdProjections = [
+    { year: 'Year 1', revenue: 500000, commission: 87500, stipend: 6000, equity: '5%', totalEarnings: 93500, note: 'Stipend starts after 1st sale (~6 months)' },
+    { year: 'Year 2', revenue: 1200000, commission: 210000, stipend: 12000, equity: '5%', totalEarnings: 222000, note: 'Building pipeline' },
+    { year: 'Year 3', revenue: 2500000, commission: 437500, stipend: 12000, equity: '7.5%', totalEarnings: 449500, note: '+2.5% equity at £2m milestone' },
+    { year: 'Year 4', revenue: 5500000, commission: 962500, stipend: 12000, equity: '10%', totalEarnings: 974500, note: '+2.5% equity at £5m milestone' }
+  ]
+
+  const formatCurrency = (n: number) => n >= 1000000 ? `£${(n/1000000).toFixed(1)}M` : `£${n.toLocaleString()}`
+
+  return (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     className="space-y-8"
   >
+    {/* MD Opportunity - Featured Section */}
+    <div className="card-glass rounded-2xl p-8 border-2 border-accent-500/30 bg-gradient-to-br from-accent-500/10 to-primary-500/10">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 rounded-xl bg-accent-500/20 flex items-center justify-center">
+          <Star className="w-6 h-6 text-accent-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold">Managing Director Opportunity</h2>
+          <p className="text-gray-400">Lead commercial growth for Europe's emerging ETF intelligence platform</p>
+        </div>
+      </div>
+
+      {/* The Package */}
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="bg-dark-800/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-accent-400 mb-1">5%</div>
+          <div className="text-sm text-gray-400">Starting Equity</div>
+          <div className="text-xs text-gray-500 mt-1">Up to 10% on milestones</div>
+        </div>
+        <div className="bg-dark-800/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-green-400 mb-1">17.5%</div>
+          <div className="text-sm text-gray-400">Commission</div>
+          <div className="text-xs text-gray-500 mt-1">On revenue you bring in</div>
+        </div>
+        <div className="bg-dark-800/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-primary-400 mb-1">£1,000</div>
+          <div className="text-sm text-gray-400">Monthly Stipend</div>
+          <div className="text-xs text-gray-500 mt-1">Starts after 1st sale</div>
+        </div>
+        <div className="bg-dark-800/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-purple-400 mb-1">4yr</div>
+          <div className="text-sm text-gray-400">Vesting Schedule</div>
+          <div className="text-xs text-gray-500 mt-1">1yr cliff, monthly after</div>
+        </div>
+      </div>
+
+      {/* Equity Milestones */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <Target className="w-5 h-5 text-primary-400" />
+          Equity Milestones
+        </h3>
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 bg-dark-800/50 rounded-lg px-4 py-3">
+            <div className="w-10 h-10 rounded-full bg-accent-500/20 flex items-center justify-center text-accent-400 font-bold">5%</div>
+            <div>
+              <div className="font-medium">Day 1</div>
+              <div className="text-xs text-gray-500">Base equity grant</div>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-600" />
+          <div className="flex items-center gap-3 bg-dark-800/50 rounded-lg px-4 py-3">
+            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 font-bold">7.5%</div>
+            <div>
+              <div className="font-medium">£2M Revenue</div>
+              <div className="text-xs text-gray-500">+2.5% equity bonus</div>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-600" />
+          <div className="flex items-center gap-3 bg-dark-800/50 rounded-lg px-4 py-3">
+            <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">10%</div>
+            <div>
+              <div className="font-medium">£5M Revenue</div>
+              <div className="text-xs text-gray-500">+2.5% equity bonus</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Year-by-Year Projections */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-green-400" />
+          Projected Earnings (Year by Year)
+        </h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="text-left py-3 px-4 text-gray-400 font-medium">Period</th>
+                <th className="text-right py-3 px-4 text-gray-400 font-medium">Revenue Generated</th>
+                <th className="text-right py-3 px-4 text-gray-400 font-medium">Commission (17.5%)</th>
+                <th className="text-right py-3 px-4 text-gray-400 font-medium">Stipend</th>
+                <th className="text-right py-3 px-4 text-gray-400 font-medium">Equity Stake</th>
+                <th className="text-right py-3 px-4 text-gray-400 font-medium">Total Cash</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-300">
+              {mdProjections.map((row, i) => (
+                <tr key={i} className="border-b border-white/5">
+                  <td className="py-3 px-4 font-medium">{row.year}</td>
+                  <td className="py-3 px-4 text-right">{formatCurrency(row.revenue)}</td>
+                  <td className="py-3 px-4 text-right text-green-400">{formatCurrency(row.commission)}</td>
+                  <td className="py-3 px-4 text-right">{formatCurrency(row.stipend)}</td>
+                  <td className="py-3 px-4 text-right text-primary-400">{row.equity}</td>
+                  <td className="py-3 px-4 text-right font-bold text-accent-400">{formatCurrency(row.totalEarnings)}</td>
+                </tr>
+              ))}
+              <tr className="bg-dark-700/50">
+                <td colSpan={5} className="py-3 px-4 font-semibold">4-Year Total Cash Earnings</td>
+                <td className="py-3 px-4 text-right font-bold text-2xl text-accent-400">
+                  {formatCurrency(mdProjections.reduce((sum, p) => sum + p.totalEarnings, 0))}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-gray-500 text-xs mt-2">* Projections assume successful pipeline development and market execution</p>
+      </div>
+
+      {/* Exit Scenarios */}
+      <div>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <DollarSign className="w-5 h-5 text-accent-400" />
+          Exit Scenarios (10% Equity)
+        </h3>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="bg-dark-800/50 rounded-xl p-4 text-center border border-gray-700/50">
+            <div className="text-sm text-gray-500 mb-1">Conservative (£34M exit)</div>
+            <div className="text-2xl font-bold text-gray-300">£3.4M</div>
+            <div className="text-xs text-gray-500 mt-1">Your share at exit</div>
+          </div>
+          <div className="bg-dark-800/50 rounded-xl p-4 text-center border-2 border-green-500/30">
+            <div className="text-sm text-green-400 mb-1">Base Case (£77M exit)</div>
+            <div className="text-2xl font-bold text-green-400">£7.7M</div>
+            <div className="text-xs text-gray-500 mt-1">Your share at exit</div>
+          </div>
+          <div className="bg-dark-800/50 rounded-xl p-4 text-center border border-purple-500/30">
+            <div className="text-sm text-purple-400 mb-1">Aggressive (£150M exit)</div>
+            <div className="text-2xl font-bold text-purple-400">£15M</div>
+            <div className="text-xs text-gray-500 mt-1">Your share at exit</div>
+          </div>
+        </div>
+        <p className="text-gray-500 text-xs mt-3">* Assumes full 10% equity vested, post-dilution from Series A & B rounds (~30% dilution total)</p>
+      </div>
+    </div>
+
     {/* Hero */}
     <div className="card-glass rounded-2xl p-8 text-center">
       <h2 className="text-3xl font-bold mb-4">
@@ -861,7 +1025,8 @@ const TeamTab = () => (
       </a>
     </div>
   </motion.div>
-)
+  )
+}
 
 export default InvestorDashboard
 
