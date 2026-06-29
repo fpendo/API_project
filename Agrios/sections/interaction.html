@@ -1,0 +1,56 @@
+<!-- INTERACTION -->
+<section id="interact">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>The Interaction Layer</span>
+      <h2>Run the whole farm <span class="grad-text">by voice</span></h2>
+      <p>Telegram is the cockpit. Whisper turns speech into text, the vault provides the answer, and Gupworthy Farm takes the follow-up actions — hands-free, in the field, in any weather.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="reveal">
+        <div class="phone">
+          <div class="bar">
+            <div class="av">A</div>
+            <div><div class="nm">Gupworthy Farm</div><div class="st">online · listening</div></div>
+          </div>
+          <div class="chat" id="chat"></div>
+        </div>
+      </div>
+
+      <div class="reveal">
+        <h3 style="font-size:24px;margin-bottom:8px">From a spoken note to a finished action</h3>
+        <p style="color:var(--text-2);margin-bottom:18px">A lame cow spotted in the field becomes a structured record, a calendar task and a vet email — without touching a keyboard. <strong style="color:var(--text-2)">Hover a step.</strong></p>
+
+        <div class="pipeline" id="voicePipeline">
+          <div class="pipe-step active" data-detail="The operator sends a Telegram voice note from the field — no typing, no app to open, works in gloves and rain.">
+            <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a3 3 0 003-3V6a3 3 0 00-6 0v9.5a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 21v-2.5"/></svg></div>
+            <h4>1 · Voice note</h4><p>Spoken on Telegram, in the field.</p>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" data-detail="Whisper transcribes the audio, handling farm jargon, breed names and tag numbers far better than generic dictation.">
+            <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12h3l2 6 4-14 2 8h5"/></svg></div>
+            <h4>2 · Whisper</h4><p>Speech → accurate text.</p>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" data-detail="The LLM extracts intent and entities — which animal, what symptom, what action is implied — and grounds the answer in the vault.">
+            <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.5 2A7.5 7.5 0 004 15.5V18a2 2 0 002 2a2 2 0 002-2M14.5 2A7.5 7.5 0 0120 15.5V18a2 2 0 01-2 2a2 2 0 01-2-2M9 22h6"/></svg></div>
+            <h4>3 · Intent + vault</h4><p>Understand &amp; ground.</p>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" data-detail="The right actions fire automatically: a structured note is appended to the vault, a calendar task is created, and a vet/supplier email is drafted.">
+            <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+            <h4>4 · Take actions</h4><p>Fan out to systems.</p>
+            <span class="branch">Vault</span> <span class="branch">Calendar</span> <span class="branch">Email</span>
+          </div>
+          <div class="pipe-arrow">→</div>
+          <div class="pipe-step" data-detail="A plain-language confirmation comes straight back on Telegram — what was logged, what task was set, and a one-tap send for the drafted email.">
+            <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div>
+            <h4>5 · Confirmation</h4><p>Back on Telegram.</p>
+          </div>
+        </div>
+        <div class="net-detail" id="voiceDetail" style="margin-top:14px">Hover a step to see what happens.</div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,79 @@
+<!-- TESTING -->
+<section id="testing">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Testing Programme</span>
+      <h2>The full testing profile: <span class="grad-text">soil, forage, genetics, water &amp; herd</span></h2>
+      <p>A practical, repeatable testing stack for a 500-acre, 50-head operation. Pick a programme to see exactly what's measured, the latest example results against reference ranges, and a sample lab report. Results arrive by email and the bot files every data point into the vault.</p>
+    </div>
+
+    <div class="test-tabs reveal" id="testTabs"></div>
+
+    <div class="reveal" id="testActive"></div>
+
+    <!-- Lab ingestion pipeline — full width -->
+    <div class="panel reveal" style="margin-top:30px">
+      <h3>Lab results → farm email → vault sync</h3>
+      <p class="desc">The ingestion pipeline that converts inbox attachments into structured knowledge. <strong style="color:var(--text-2)">Hover a step.</strong></p>
+      <div class="pipeline" id="ingestPipeline">
+        <div class="pipe-step active" data-detail="When the lab finishes, it emails the certificate/result file to the farm inbox — exactly as it does today. No change to lab workflow needed.">
+          <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+          <h4>1 · Lab email received</h4><p>Result certificate lands in the farm inbox.</p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" data-detail="The bot watches the mailbox and detects the attachment type — PDF certificate, CSV/XLSX data file, or a secure portal link — and routes it to the correct parser.">
+          <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
+          <h4>2 · Detect type</h4><p>Identify: PDF · CSV/XLSX · portal link.</p>
+          <span class="branch">PDF</span> <span class="branch">CSV</span> <span class="branch">link</span>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" data-detail="PDFs go through OCR + table extraction; CSV/XLSX are parsed directly against a schema; portal links are fetched and normalised. Every value is mapped to sample_id, analyte, unit, value, reference_range.">
+          <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M3 13v4a2 2 0 002 2h4m12-6v4a2 2 0 01-2 2h-4"/></svg></div>
+          <h4>3 · Parse &amp; map</h4><p>OCR / schema → analyte · unit · value · sample_id.</p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" data-detail="Each value is validated against expected ranges; anything out of band is flagged good / watch / action before it is trusted. Suspect OCR extractions are flagged for manual review.">
+          <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></div>
+          <h4>4 · Validate</h4><p>Range &amp; QA checks — flag good / watch / action.</p>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" data-detail="A structured note is written to the Obsidian vault, dashboards update, and any required tasks (re-test, lime order, worming, vet call) are triggered automatically via Telegram.">
+          <div class="pn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></div>
+          <h4>5 · Store &amp; vault</h4><p>Structured note written, dashboards updated, tasks triggered.</p>
+        </div>
+      </div>
+      <div class="net-detail" id="ingestDetail" style="margin-top:14px">Hover a step to see what happens at that stage.</div>
+    </div>
+
+    <!-- Testing costs — full width -->
+    <div class="panel reveal" style="margin-top:22px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start">
+        <div>
+          <h3>Testing costs and annual budget</h3>
+          <p class="desc">Indicative UK 2026 ex-VAT planning assumptions for a 50-head, 500-acre operation. Genetics is a one-off investment per animal; all other rows recur annually.</p>
+          <table class="tbl" style="margin-top:14px">
+            <thead><tr><th>Programme</th><th class="num">Assumption</th><th class="num">Cost</th></tr></thead>
+            <tbody>
+              <tr><td>Soil chemistry + carbon (1 quadrant/yr, 4-yr rotation)</td><td class="num">~10 composites/yr</td><td class="num">~£700/yr</td></tr>
+              <tr><td>Forage — silage lots + feeding season spot checks</td><td class="num">~7 samples/yr</td><td class="num">~£280/yr</td></tr>
+              <tr><td>Water — 4 troughs biannual + borehole annual</td><td class="num">~10 samples/yr</td><td class="num">~£350/yr</td></tr>
+              <tr><td>Animal health — FEC, blood profiles, disease screen</td><td class="num">~50 tests/yr</td><td class="num">~£900/yr</td></tr>
+              <tr class="tot"><td>Recurring annual testing budget</td><td class="num"></td><td class="num">~£2,230/yr</td></tr>
+              <tr style="border-top:1px solid var(--border)"><td>Genetics — WGS (5 animals) + 50K SNP (45 animals)</td><td class="num">50 animals <em>(one-off)</em></td><td class="num">£3,500 one-off</td></tr>
+            </tbody>
+          </table>
+          <p class="muted" style="margin-top:10px;font-size:12.5px">Genetics sequencing is done once per animal — the result is permanent. Email ingestion and vault automation is built in-house at zero direct cost. Soil uses composite samples (20–25 cores bulked per test), not one test per hectare — the 4-year quadrant rotation keeps annual cost low while covering the whole farm over time.</p>
+        </div>
+        <div>
+          <h3 style="margin-bottom:4px">Annual recurring spend</h3>
+          <p class="desc" style="margin-bottom:12px">Four recurring programmes — genetics excluded as a one-off.</p>
+          <div class="chart-wrap"><canvas id="testingCostChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout reveal" style="margin-top:22px">
+      <strong>Practical recommendation:</strong> start with full testing in two quadrants for 1–2 months (pilot), tune sampling density and ingestion schemas, then scale farm-wide. This avoids over-sampling cost while still building a high-quality baseline for the vault.
+    </div>
+  </div>
+</section>

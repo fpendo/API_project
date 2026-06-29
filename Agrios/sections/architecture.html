@@ -1,0 +1,146 @@
+<!-- ARCHITECTURE / CONNECTIVITY -->
+<section id="architecture">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>On-Farm Architecture</span>
+      <h2>Connectivity that reaches <span class="grad-text">every corner of the farm</span></h2>
+      <p>Every signal travels from field sensor to vault along one clear path. <strong style="color:var(--text-2)">Hover or tap any node</strong> to see exactly what it does. Data flows upward — the vault sits at the top so nothing is ever lost.</p>
+    </div>
+
+    <div class="panel reveal">
+
+      <!-- SVG layer for connecting lines (drawn by architecture.js) -->
+      <div class="arch-wrap" id="archWrap">
+        <svg class="arch-svg" id="archSvg" aria-hidden="true"></svg>
+
+        <!-- Row 0 — Vault (destination, top) -->
+        <div class="arch-row" id="archRowVault">
+          <div class="arch-node arch-vault arch-node-main" id="archVault"
+               data-detail="<b>Gupworthy Farm Vault (Obsidian):</b> the destination for every signal. Each reading lands as a timestamped, geo-tagged, structured note alongside the research corpus. The LLM reasons across all of it to give grounded, source-cited answers specific to this herd, this soil and this season.">
+            <span class="ani">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z"/></svg>
+            </span>
+            <span class="arc-info">
+              <span class="arc-label">Gupworthy Farm Vault</span>
+              <span class="arc-sub">Obsidian · LLM overlay · source of truth</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 1 — Starlink -->
+        <div class="arch-row" id="archRowStarlink">
+          <div class="arch-node arch-sky arch-node-mid" id="archStarlink"
+               data-detail="<b>Starlink + 4G failover:</b> high-throughput satellite internet at the farmhouse — the single bridge between the on-farm mesh and the cloud vault. A 4G SIM provides instant failover if the dish loses lock. Typical latency &lt;40 ms, typical throughput &gt;100 Mbps down.">
+            <span class="ani">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+            </span>
+            <span class="arc-info">
+              <span class="arc-label">Starlink + 4G</span>
+              <span class="arc-sub">satellite uplink · cloud bridge</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 2 — Local Hub -->
+        <div class="arch-row" id="archRowHub">
+          <div class="arch-node arch-amber arch-node-mid" id="archHub"
+               data-detail="<b>Edge server / local hub:</b> a mini-PC at the farmhouse running ChirpStack (LoRaWAN server), the Telegram bot, Whisper STT transcription, and the vault sync daemon. A UPS and small solar keep it alive through power outages. All data is processed locally before being pushed to the cloud vault.">
+            <span class="ani">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16v6H4zM4 13h16v6H4zM8 8h.01M8 16h.01"/></svg>
+            </span>
+            <span class="arc-info">
+              <span class="arc-label">Local Hub</span>
+              <span class="arc-sub">ChirpStack · bot · vault sync · STT</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Row 3 — 5 × LoRa Gateways -->
+        <div class="arch-row arch-row-gw" id="archRowGW">
+          <div class="arch-node arch-node-gw" data-detail="<b>GW1 — North-East corner:</b> solar-powered 8-channel LoRaWAN gateway, IP67, covering the NE quadrant. 5 GHz airMAX radio relays IP traffic back to the hub. Self-healing mesh means it reroutes via GW3 if direct link drops.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">GW1</span><span class="arc-sub">NE corner</span></span>
+          </div>
+          <div class="arch-node arch-node-gw" data-detail="<b>GW2 — North-West corner:</b> identical solar gateway covering the NW quadrant. Coverage circle overlaps GW1 and GW3 so no dead zones across the northern boundary and valley floor.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">GW2</span><span class="arc-sub">NW corner</span></span>
+          </div>
+          <div class="arch-node arch-node-gw arch-gw-centre" data-detail="<b>GW3 — Central hub gateway:</b> co-located at the farmhouse hub, also acting as the primary backhaul gateway. Hears uplinks from all quadrants at reasonable RSSI and provides redundancy for the edge server.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">GW3</span><span class="arc-sub">Hub · central</span></span>
+          </div>
+          <div class="arch-node arch-node-gw" data-detail="<b>GW4 — South-East corner:</b> covers the SE quadrant including the lower grazing ground. Coverage overlaps GW3 and GW5. Antenna pointed slightly south to reach valley-floor deadspots.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">GW4</span><span class="arc-sub">SE corner</span></span>
+          </div>
+          <div class="arch-node arch-node-gw" data-detail="<b>GW5 — South-West corner:</b> covers the SW quadrant and the furthest boundary. Its 5 GHz mesh radio hops via GW4 or GW3 depending on conditions, ensuring the hub always has a route.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">GW5</span><span class="arc-sub">SW corner</span></span>
+          </div>
+        </div>
+
+        <!-- Row 4 — Data inputs -->
+        <div class="arch-row arch-row-inputs" id="archRowInputs">
+          <div class="arch-node arch-node-input" data-detail="<b>Weather station:</b> rainfall, wind speed/direction, air temperature, relative humidity, UV index and atmospheric pressure streamed every 5 min over LoRa. Soil temperature probe at 10 cm feeds the grass-growth model.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 001-9.9A6 6 0 105 12"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Weather</span><span class="arc-sub">env. telemetry</span></span>
+          </div>
+          <div class="arch-node arch-node-input" data-detail="<b>EID + GPS ear-tags:</b> a unique identity for every animal plus live location, movement and behaviour across all 500 acres — no per-tag SIM required. Tags uplink over LoRa every 15 min.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a8 8 0 018 8c0 5.5-8 12-8 12S4 15.5 4 10a8 8 0 018-8z"/></svg></span>
+            <span class="arc-info"><span class="arc-label">EID / GPS</span><span class="arc-sub">herd tracking</span></span>
+          </div>
+          <div class="arch-node arch-node-input" data-detail="<b>Soil &amp; moisture probes:</b> per-cell capacitance probes at three depths log live moisture %, plus pH and nutrient sensors in trial plots. Penetrometer readings from field passes are uploaded manually via QR logging.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Soil / water</span><span class="arc-sub">grid probes</span></span>
+          </div>
+          <div class="arch-node arch-node-input" data-detail="<b>Weigh crate &amp; health records:</b> live-weight, daily gain and exact drug dosing logged per animal at the race. Vet visit notes, mobility scores and calving records are dictated by voice via Telegram Whisper STT.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V9h6v8M5 21h14M7 9V5a5 5 0 0110 0v4"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Health</span><span class="arc-sub">weigh · meds · vet</span></span>
+          </div>
+          <div class="arch-node arch-node-input" data-detail="<b>Lab results (forage / soil / genetics):</b> silage and hay analysis, soil chemistry panels, full genome or SNP results and blood profiles arrive by email and are parsed automatically into structured vault records.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Lab results</span><span class="arc-sub">forage · soil · DNA</span></span>
+          </div>
+          <div class="arch-node arch-node-input arch-input-market" data-detail="<b>Carcass &amp; deadweight prices:</b> weekly AHDB price feeds, processor kill sheets (ABP, Dunbia, Dawn Meats) and auction deadweight results are pulled automatically. The vault tracks R, U and O grade price trends per kg, flagging when prices cross target thresholds.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l3-3 3 3 5-6"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Carcass prices</span><span class="arc-sub">AHDB · kill sheets</span></span>
+          </div>
+          <div class="arch-node arch-node-input arch-input-market" data-detail="<b>Bull &amp; store cattle sale prices:</b> breed society online catalogue results (South Devon Herd Book, Hereford Cattle Society), Kivells and Darlington auction results are scraped after each sale. The vault indexes sire EBV vs. hammer price so bull ROI can be modelled before the next sale.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Sale prices</span><span class="arc-sub">bulls · stores · auctions</span></span>
+          </div>
+          <div class="arch-node arch-node-input" data-detail="<b>Financial &amp; compliance records:</b> vet invoices, feed receipts, BPS/ELM payment notifications and regulatory correspondence are forwarded to a dedicated inbox and parsed into the vault. The LLM can model enterprise margins in real time against current market prices.">
+            <span class="ani"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path stroke-linecap="round" d="M2 10h20"/></svg></span>
+            <span class="arc-info"><span class="arc-label">Financial</span><span class="arc-sub">costs · grants · margins</span></span>
+          </div>
+        </div>
+
+      </div><!-- /arch-wrap -->
+
+      <div class="net-detail" id="netDetail">Hover or tap any node to see exactly what it does and how it connects to the rest of the system.</div>
+    </div>
+
+    <div class="grid-4" style="margin-top:26px">
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></div>
+        <h3>Starlink backhaul</h3>
+        <p>High-throughput satellite link bridges the farm mesh to the cloud vault, with 4G SIM failover so the connection is always on.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20v-6m0 0a4 4 0 100-8 4 4 0 000 8zM5 21l3-3m11 3l-3-3"/></svg></div>
+        <h3>Solar LoRa mesh</h3>
+        <p>Five off-grid gateways with overlapping 8-km coverage circles and a 5 GHz self-healing backhaul — no dead zones, no SIM bills.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2a8 8 0 018 8c0 5.5-8 12-8 12S4 15.5 4 10a8 8 0 018-8z"/></svg></div>
+        <h3>Herd + field inputs</h3>
+        <p>Weather, EID/GPS, soil probes, weigh-crate, lab results, health records and market price feeds — all routing to one vault.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l3-3 3 3 5-6"/></svg></div>
+        <h3>Market intelligence</h3>
+        <p>Carcass prices, bull sale results and store cattle values feed in alongside farm data so every decision has current market context.</p>
+      </div>
+    </div>
+  </div>
+</section>

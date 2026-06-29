@@ -1,0 +1,45 @@
+<!-- KNOWLEDGE ENGINE -->
+<section id="knowledge">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>The Knowledge Engine</span>
+      <h2>A research agent swarm that <span class="grad-text">never stops learning</span></h2>
+      <p>The starting point is knowledge. A looping swarm of research agents spends 4–8 weeks going broad and deep on beef farming — building the base intelligence the whole system reasons from. <strong style="color:var(--text-2)">Hover or tap any stage</strong> to see what it does.</p>
+    </div>
+
+    <!-- Interactive flow feature -->
+    <div class="panel reveal" style="margin-bottom:30px">
+      <div class="flow-feature">
+        <div>
+          <div class="flow-stage-list" id="flowStages"></div>
+          <div style="margin-top:14px">
+            <div class="desc" style="margin-bottom:8px">Stage 3 dispatches six specialists — hover one:</div>
+            <div class="flow-agents" id="flowAgents"></div>
+          </div>
+        </div>
+        <div class="flow-detail" id="flowDetail"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel reveal">
+        <h3>Knowledge growth over the run</h3>
+        <p class="desc">Modelled breadth vs. depth of the vault across an 8-week swarm.</p>
+        <div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+      </div>
+      <div class="panel reveal">
+        <h3>Research domain coverage</h3>
+        <p class="desc">Relative depth reached across every domain that affects beef.</p>
+        <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px">
+      <h3 style="text-align:center">Explore the research domains</h3>
+      <p class="desc" style="text-align:center">Every factor that touches beef farming becomes a branch of the vault.</p>
+      <div class="domain-tabs" id="domainTabs"></div>
+      <div id="domainPanels"></div>
+    </div>
+
+  </div>
+</section>

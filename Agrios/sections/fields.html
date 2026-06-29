@@ -1,0 +1,56 @@
+<!-- FIELDS & QUADRANTS -->
+<section id="fields">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Fields &amp; Quadrants</span>
+      <h2>500 acres on Exmoor, <span class="grad-text">mapped to a living grid</span></h2>
+      <p>The same satellite block, divided into four quadrants (A–D) and sixteen management cells. <strong style="color:var(--text-2)">Hover or tap a cell</strong> on the map to pull its full testing profile and watch its nutrients drift over time — driving bespoke per-cell payloads instead of blanket application.</p>
+    </div>
+
+    <div class="satwrap">
+      <div class="reveal field-col-left">
+        <div class="fieldmap" id="fieldmap">
+          <img src="assets/exmoor-satellite.jpg" alt="Satellite imagery of Exmoor farmland with quadrant overlay" loading="lazy" />
+          <svg id="fieldOverlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="Farm quadrant grid overlay"></svg>
+          <div class="frame"></div>
+        </div>
+        <div class="maplegend">
+          <span><i class="lg" style="background:rgba(163,230,53,.6)"></i> Management cells (16)</span>
+          <span><i class="lg" style="background:#7dd3fc"></i> Selected cell</span>
+          <span><i class="lg" style="background:#38bdf8;opacity:.6"></i> Quadrant divide (A–D)</span>
+          <span style="color:var(--green)">Esri World Imagery · Exmoor</span>
+        </div>
+      </div>
+
+      <div class="ctrls reveal">
+        <div class="panel">
+          <div class="cow-head" style="margin-bottom:6px">
+            <div>
+              <div class="id" id="fieldTitle">Cell A1</div>
+              <div class="sub" id="fieldSub">Quadrant A (NW) · ~31 acres · last tested 18 Jun 2026</div>
+            </div>
+            <span class="badge2 good" id="fieldStatus">good</span>
+          </div>
+          <table class="tbl" style="margin-top:10px">
+            <tbody id="fieldExtra"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px">
+      <h3>Nutrient drift over time</h3>
+      <p class="desc">Section-specific trends over the last six test rounds — drift &amp; treatment impact.</p>
+      <div class="chart-wrap" style="height:300px"><canvas id="fieldNutrientChart"></canvas></div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px">
+      <h3>Full testing history — <span id="fieldEventsTitle">Cell A1</span></h3>
+      <p class="desc">Every recorded test event and the action it triggered.</p>
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Test event</th><th class="num">Result</th><th class="num">Action</th></tr></thead>
+        <tbody id="fieldEventTable"></tbody>
+      </table>
+    </div>
+  </div>
+</section>

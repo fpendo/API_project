@@ -12,7 +12,7 @@ set -e
 BACKUP_DIR=${1:-"/opt/backups"}
 DATE=$(date +%Y%m%d_%H%M%S)
 NEMX_DIR="/opt/app/nemx"
-PORTAL_DIR="/opt/app/portal"
+PORTAL_DIR="/opt/app/nemx/portal"
 
 echo "Creating backup at $BACKUP_DIR..."
 

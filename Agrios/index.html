@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gupworthy Farm · An Operating System for Farming Intelligence</title>
+  <meta name="description" content="Gupworthy Farm is building an operating system for farming intelligence — a research-fed knowledge vault, an on-farm sensor mesh, and a voice-first interface that turns raw farm data into better decisions, higher profit and lower operating costs." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="bg-fx"></div>
+  <div class="grid-fx"></div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top">
+        <span class="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C7 7 7 13 12 22c5-9 5-15 0-20z"/><path stroke-linecap="round" d="M12 9v9"/></svg>
+        </span>
+        Gupworthy Farm
+      </a>
+      <div class="nav-links" id="navLinks">
+        <a href="#overview">Overview</a>
+        <a href="#knowledge">Knowledge</a>
+        <a href="#architecture">Connectivity</a>
+        <a href="#coverage">Coverage</a>
+        <a href="#ar">AR</a>
+        <a href="#market">Market</a>
+        <a href="#testing">Testing</a>
+        <a href="#fields">Fields</a>
+        <a href="#cattle">Cattle</a>
+        <a href="#interact">Voice</a>
+        <a href="#analytics">Analytics</a>
+        <a href="#roadmap">Roadmap</a>
+      </div>
+      <a class="nav-cta" href="#overview">Explore the Plan</a>
+      <button class="burger" id="burger" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <span id="top"></span>
+
+  <!-- Modular sections are fetched and injected by assets/js/main.js -->
+  <main id="app">
+    <div data-include="sections/hero.html"></div>
+    <div data-include="sections/overview.html"></div>
+    <div data-include="sections/knowledge.html"></div>
+    <div data-include="sections/architecture.html"></div>
+    <div data-include="sections/coverage.html"></div>
+    <div data-include="sections/ar.html"></div>
+    <div data-include="sections/market.html"></div>
+    <div data-include="sections/testing.html"></div>
+    <div data-include="sections/fields.html"></div>
+    <div data-include="sections/cattle.html"></div>
+    <div data-include="sections/interaction.html"></div>
+    <div data-include="sections/analytics.html"></div>
+    <div data-include="sections/roadmap.html"></div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <a class="brand" href="#top">
+        <span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C7 7 7 13 12 22c5-9 5-15 0-20z"/><path stroke-linecap="round" d="M12 9v9"/></svg></span>
+        Gupworthy Farm
+      </a>
+      <p>An Operating System for Farming Intelligence — pilot concept for a 500-acre Exmoor beef enterprise.</p>
+      <p class="note">This page is a living plan and design artifact. Charts and figures are illustrative models used to communicate the concept and will be superseded by real measured data once the system is operational.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

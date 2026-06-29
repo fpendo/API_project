@@ -3,7 +3,7 @@
 > **CRITICAL:** This file contains essential project information, known bugs, fixes, and implementation details.
 > **Always read this file first** before starting work on the project.
 
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-06-29
 
 ---
 
@@ -146,6 +146,79 @@ python post_reset_fix.py --yes
 - `backend/reset_db.py` - Database reset script
 - `backend/fix_broker_developer_addresses.py` - Manual address fix
 - `backend/update_env_keys.py` - Manual key update
+
+---
+
+### 4. Portal Login Connection Error / 502 Bad Gateway (FIXED)
+
+**Problem:**
+- `www.nemx.co.uk/login` displayed a connection error.
+- Public `POST /api/auth/login` returned `502 Bad Gateway`.
+
+**Root Cause:**
+- Nginx proxies `/api/auth/` to the portal backend on `127.0.0.1:8080`.
+- `portal-backend.service` was configured for `/opt/app/portal/backend`, but the deployed portal backend is under `/opt/app/nemx/portal/backend`.
+- The portal backend virtualenv had stale executable paths from the old location.
+
+**Fix:**
+1. Update the live systemd unit and deploy-copy unit to use `/opt/app/nemx/portal/backend`.
+2. Recreate the portal backend virtualenv:
+   ```bash
+   python3 -m venv --clear /opt/app/nemx/portal/backend/venv
+   /opt/app/nemx/portal/backend/venv/bin/python -m pip install -r /opt/app/nemx/portal/backend/requirements.txt
+   ```
+3. Restart the service:
+   ```bash
+   systemctl daemon-reload
+   systemctl restart portal-backend
+   ```
+
+**Prevention:**
+- Keep deployment service paths aligned with the actual VPS app layout.
+- After moving app directories, recreate virtualenvs instead of reusing relocated script shims.
+- Verify with `curl` that `/api/auth/login` returns `401` for bad credentials or `200` for configured credentials, not `502`.
+
+**Key Files:**
+- `/etc/systemd/system/portal-backend.service` - Live systemd unit
+- `deploy/systemd/portal-backend.service` - Deployment copy
+- `nemx/portal/backend/app/main.py` - Portal auth API
+
+---
+
+## Portal & Multi-Project Layout
+
+The root domain (`www.nemx.co.uk`) serves a **Project Portal** (login + project selector). Projects are added as cards in the portal dashboard and served as separate paths behind nginx.
+
+**Key locations:**
+- Portal frontend source: `nemx/portal/frontend/` (React + Vite + Tailwind). Project cards are defined in `src/pages/Dashboard.tsx` (the `projects` array).
+- Portal backend (auth): `nemx/portal/backend/` on `127.0.0.1:8080` (systemd `portal-backend`).
+- Built portal is deployed to `/var/www/portal/` (nginx `location /`).
+- Live nginx config: `/etc/nginx/sites-available/portal`; repo copy: `deploy/nginx/portal.conf`.
+
+**To add a new project to the portal:**
+1. Add a card to the `projects` array in `nemx/portal/frontend/src/pages/Dashboard.tsx` (`status: 'active'`, `href: '/<slug>/'`).
+2. Add an nginx `location /<slug>/` block (alias to its `/var/www/<slug>/`) in BOTH the live config and `deploy/nginx/portal.conf`.
+3. Deploy the project's static files to `/var/www/<slug>/`.
+4. Rebuild the portal: `cd nemx/portal/frontend && npm run build`, then `cp -r dist/* /var/www/portal/` (remove stale hashed assets), `chown -R www-data:www-data`.
+5. `nginx -t && systemctl reload nginx`.
+
+**Existing projects:**
+- **NEMX** — `/nemx/` (served from `/var/www/nemx/`). The offset exchange app.
+- **Agrios** — `/agrios/` (served from `/var/www/agrios/`). "An Operating System for Farming Intelligence" — an interactive landing page/plan. **As of 2026-06-29 it is a MODULAR static site** (no longer one big `index.html`). Chart.js loads via CDN; Mermaid was **removed** (all flowcharts are now custom interactive HTML/SVG). Source of truth lives under `Agrios/`:
+  - `Agrios/index.html` — thin shell: `<head>`, nav, a `<main>` of `<div data-include="sections/xxx.html">` placeholders, footer, and `<script type="module" src="assets/js/main.js">`.
+  - `Agrios/sections/*.html` — one HTML partial per section (hero, overview, knowledge, architecture, coverage, data, testing, fields, cattle, interaction, analytics, roadmap).
+  - `Agrios/assets/css/styles.css` — all styles.
+  - `Agrios/assets/js/` — ES modules: `main.js` (fetches & injects partials via `data-include`, then boots sections), `theme.js` (Chart.js theme + `grad()`), `util.js` (`onVisible`, `$`), `data.js` (ALL mock data — cows/calves/genetics/cuts, fields, testing, research swarm, domains, chat), and `sections/<name>.js` (one initializer each, exported as `init<Name>()`).
+  - **How modularity works:** `main.js#includePartials()` fetches each `data-include` URL and injects it, then runs each `init*()` wrapped in try/catch. Served under `/agrios/` so relative paths (`sections/…`, `assets/…`) resolve; nginx `try_files` serves the partials/modules. JS is served as `application/javascript` (required for ESM).
+  - **Section highlights (redesigned 2026-06-29):**
+    - **Knowledge** — research swarm is an interactive *flow feature*: 6 hoverable stage cards + 6 specialist agents drive a sticky detail panel (replaces the old Mermaid swarm chart). Plus growth/radar charts and domain deep-dive tabs.
+    - **Connectivity (architecture)** — 5-layer integration diagram (data points → LoRa gateways/ChirpStack → self-healing 5GHz mesh → Starlink hub → cloud/vault/LLM), each node hover-explained in `#netDetail`.
+    - **Coverage** — Exmoor satellite LoRa coverage simulator (`assets/exmoor-satellite.jpg`) + full bill-of-materials (unchanged, ported).
+    - **Testing** — reimagined: 5 programme tabs (soil/forage/genetics/water/animal), each with a full analyte result grid (value vs range + good/watch/act meters), a sample lab report, cadence table, custom ingestion pipeline (replaces Mermaid), and cost chart. Data in `data.js#testing`.
+    - **Fields** — quadrants A–D + 16 management cells **overlaid on the satellite image** via bilinear-interpolated SVG polygons (`fields.js`). Hover a cell → full testing profile (pH/P/K/Mg/S/CEC/texture/moisture), nutrient-drift chart over 6 rounds, and a test-history table. Data in `data.js#fieldSeries`.
+    - **Cattle HUD** — cow selector → rich record with a **butcher's-chart SVG body map** (hover a primal cut for its name + any injury on that cut; injured cuts highlighted + markers), 4 sub-tabs (Overview/Health/Genetics & DNA/Calves): genomic EBV radar, breed composition, parentage, genetic conditions & markers, vaccination schedule, meds, and a **calves drill-down** with per-calf birth details + growth-curve charts. Data in `data.js#cows` (+ `cuts`).
+    - **Voice** — custom 5-step pipeline (replaces Mermaid) + animated Telegram chat.
+  - **To update & deploy:** edit files under `Agrios/`, then copy the whole tree: `cp Agrios/index.html /var/www/agrios/ && cp -r Agrios/assets Agrios/sections /var/www/agrios/ && chown -R www-data:www-data /var/www/agrios`. (Copy `sections/` too — easy to forget.) A jsdom smoke test (inject partials + run every `init*()`) is the quickest way to catch runtime errors without a browser.
 
 ---
 

@@ -1,0 +1,85 @@
+<!-- AUGMENTED REALITY -->
+<section id="ar">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Augmented Reality</span>
+      <h2>See the data <span class="grad-text">overlaid on the world</span></h2>
+      <p>AR glasses tied to the Gupworthy Farm vault put every animal's record and every field's sampling instruction exactly where it belongs — floating in the real world, in front of your eyes, as you walk the farm.</p>
+    </div>
+
+    <div class="ar-shots reveal">
+
+      <!-- Shot 1: cattle ID -->
+      <div class="ar-shot">
+        <img src="assets/ar-cattle-view.png"
+             alt="Augmented reality first-person view through smart glasses showing cattle on Exmoor with HUD overlay identifying Cow BCM-123-EXM and medication reminder"
+             loading="lazy" />
+        <span class="ar-badge">View 1 · Cattle ID</span>
+        <div class="ar-caption">
+          <h4>Check Cow BCM-123-EXM — medication follow-up</h4>
+          <p>The glasses detect EID ear-tag signals and pull the animal's live record from the vault. A green arrow locks on to the flagged cow; the HUD shows current health status, active medication and last recorded weight — all without unlocking a phone.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge2 watch">⚠ Rear-left lameness active</span>
+            <span class="badge2 good">Meloxicam Day 4 / 5</span>
+            <span class="badge2">612 kg · GPS: strong</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shot 2: soil sampling -->
+      <div class="ar-shot">
+        <img src="assets/ar-soil-sample.png"
+             alt="Augmented reality first-person view through smart glasses showing an empty Exmoor field with AR soil-sample grid overlay, QR code and GPS marker for Cell B3"
+             loading="lazy" />
+        <span class="ar-badge">View 2 · Soil sampling</span>
+        <div class="ar-caption">
+          <h4>Sample here — Grid B3 · Chemistry + OM panel due</h4>
+          <p>In sampling mode the glasses render the soil management grid onto the live field view. A crosshair locks to the correct GPS waypoint, the QR code logs the sample bag to the vault on scan, and the last result (pH 5.4 — lime recommended) reminds the operator what action is needed.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+            <span class="badge2 act">pH 5.4 — lime priority</span>
+            <span class="badge2">Quadrant B · Cell 3</span>
+            <span class="badge2">QR — scan to log</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="ar-features reveal" style="margin-top:10px">
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></div>
+        <h4>EID tag recognition</h4>
+        <p>The glasses read LoRa EID signals in range and pull each animal's record from the vault — no manual scanning needed.</p>
+      </div>
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg></div>
+        <h4>GPS-anchored soil grid</h4>
+        <p>Management cell boundaries are projected onto the field in real time — the operator walks to the crosshair and the bag is geo-logged on scan.</p>
+      </div>
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6.364 1.636l-.707.707M20 12h-1M17.657 17.657l-.707-.707M12 20v-1M6.343 17.657l-.707.707M4 12H3M6.343 6.343l.707.707"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h4>Live vault sync</h4>
+        <p>Annotations in the HUD are pulled fresh from the Obsidian vault over the mesh — always current, whether that's a new test result or a fresh vet note.</p>
+      </div>
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="17" y="17" width="4" height="4" rx=".5"/></svg></div>
+        <h4>QR sample logging</h4>
+        <p>Scanning a bag QR code auto-creates a vault entry with GPS co-ordinates, cell ID, operator and timestamp — no paperwork, no transcription errors.</p>
+      </div>
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+        <h4>Priority alerts</h4>
+        <p>Animals with active health flags, overdue vaccinations or breached geofences are surfaced as they enter the field of view — nothing to check, nothing to miss.</p>
+      </div>
+      <div class="ar-feat">
+        <div class="afi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.5a3 3 0 003-3V6a3 3 0 00-6 0v9.5a3 3 0 003 3zM19 11a7 7 0 01-14 0M12 21v-2.5"/></svg></div>
+        <h4>Hands-free voice control</h4>
+        <p>Whisper STT on the glasses lets the operator dictate notes, confirm actions and ask questions — gloves on, in any weather.</p>
+      </div>
+    </div>
+
+    <div class="callout reveal" style="margin-top:26px">
+      <strong>Hardware concept:</strong> Any lightweight LoRa-paired AR headset (e.g. XReal, Vuzix, or custom open-frame) running a lightweight client that queries the Gupworthy Farm vault via the mesh network. The glasses receive EID uplinks from the same gateways already on the farm — no separate infrastructure needed.
+    </div>
+  </div>
+</section>

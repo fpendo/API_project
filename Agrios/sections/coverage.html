@@ -1,0 +1,196 @@
+<!-- COVERAGE -->
+<section id="coverage">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow"><span class="dot"></span>Connectivity &amp; Coverage</span>
+      <h2>Blanket the farm with a <span class="grad-text">solar LoRa mesh</span></h2>
+      <p>A worked example over real Exmoor terrain: a ~500-acre block with a LoRa gateway in each corner and one in the centre. Their coverage circles overlap like a Venn diagram so there are no dead zones — and a smart mesh funnels everything back to Starlink at the central hub.</p>
+    </div>
+
+    <div class="satwrap">
+      <div class="reveal">
+        <div class="satmap" id="satmap">
+          <img src="assets/exmoor-satellite.jpg" alt="Satellite imagery of Exmoor farmland" loading="lazy" />
+          <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-label="LoRa gateway coverage overlay">
+            <polygon points="70,90 930,60 945,930 90,945" fill="rgba(163,230,53,0.06)" stroke="#a3e635" stroke-width="3" stroke-dasharray="10 7"/>
+            <g stroke="#38bdf8" stroke-width="2.2" stroke-dasharray="7 6" opacity="0.85" fill="none">
+              <line x1="509" y1="506" x2="70" y2="90"/>
+              <line x1="509" y1="506" x2="930" y2="60"/>
+              <line x1="509" y1="506" x2="945" y2="930"/>
+              <line x1="509" y1="506" x2="90" y2="945"/>
+              <line x1="70" y1="90" x2="930" y2="60"/>
+              <line x1="930" y1="60" x2="945" y2="930"/>
+              <line x1="945" y1="930" x2="90" y2="945"/>
+              <line x1="90" y1="945" x2="70" y2="90"/>
+            </g>
+            <g id="circles" fill="rgba(74,222,128,0.16)" stroke="rgba(74,222,128,0.75)" stroke-width="2.5">
+              <circle cx="70"  cy="90"  r="0"/>
+              <circle cx="930" cy="60"  r="0"/>
+              <circle cx="945" cy="930" r="0"/>
+              <circle cx="90"  cy="945" r="0"/>
+              <circle cx="509" cy="506" r="0"/>
+            </g>
+            <g font-family="Space Grotesk" font-size="15" font-weight="700">
+              <g><circle cx="70" cy="90" r="9" fill="#a3e635" stroke="#063d1d" stroke-width="2"/><text x="84" y="84" fill="#eafff1">GW1</text></g>
+              <g><circle cx="930" cy="60" r="9" fill="#a3e635" stroke="#063d1d" stroke-width="2"/><text x="888" y="54" fill="#eafff1">GW2</text></g>
+              <g><circle cx="945" cy="930" r="9" fill="#a3e635" stroke="#063d1d" stroke-width="2"/><text x="900" y="958" fill="#eafff1">GW3</text></g>
+              <g><circle cx="90" cy="945" r="9" fill="#a3e635" stroke="#063d1d" stroke-width="2"/><text x="104" y="968" fill="#eafff1">GW4</text></g>
+              <g><circle cx="509" cy="506" r="13" fill="#38bdf8" stroke="#04222e" stroke-width="3"/><text x="528" y="500" fill="#eafff1">GW5 · Starlink hub</text></g>
+            </g>
+            <g>
+              <rect x="56" y="612" width="160" height="34" rx="8" fill="rgba(7,13,9,0.7)"/>
+              <line x1="72" y1="635" x2="197" y2="635" stroke="#eafff1" stroke-width="3"/>
+              <line x1="72" y1="629" x2="72" y2="641" stroke="#eafff1" stroke-width="3"/>
+              <line x1="197" y1="629" x2="197" y2="641" stroke="#eafff1" stroke-width="3"/>
+              <text x="76" y="627" fill="#eafff1" font-size="13" font-family="Outfit">200 m</text>
+            </g>
+          </svg>
+          <div class="frame"></div>
+        </div>
+        <div class="maplegend">
+          <span><i class="lg" style="background:#a3e635"></i> Corner gateways (×4)</span>
+          <span><i class="lg" style="background:#38bdf8"></i> Central hub + Starlink</span>
+          <span><i class="lg" style="background:rgba(74,222,128,.5)"></i> LoRa coverage radius</span>
+          <span><i class="lg" style="background:#a3e635;opacity:.5"></i> Farm boundary (~500 ac)</span>
+          <span style="color:var(--green)">Esri World Imagery · Exmoor</span>
+        </div>
+      </div>
+
+      <div class="ctrls reveal">
+        <div class="panel">
+          <h3>Coverage simulator</h3>
+          <p class="desc">Drag to change each gateway's effective radius and watch the cells overlap to fill the farm.</p>
+          <div class="readout">
+            <div class="ro"><div class="v" id="roRadius">750 m</div><div class="l">Coverage radius / node</div></div>
+            <div class="ro"><div class="v" id="roCover">100%</div><div class="l">Farm covered</div></div>
+            <div class="ro"><div class="v">5</div><div class="l">Gateways</div></div>
+          </div>
+          <div style="margin-top:16px">
+            <input id="radiusSlider" class="slider" type="range" min="100" max="1600" step="10" value="750" />
+          </div>
+          <div class="toggle-row" id="radiusPresets" style="margin-top:16px">
+            <button class="toggle" data-m="200">200 m · conservative</button>
+            <button class="toggle active" data-m="750">750 m · recommended</button>
+            <button class="toggle" data-m="1500">1.5 km · line-of-sight</button>
+          </div>
+          <p class="muted" style="font-size:12.5px;margin-top:12px;color:var(--muted)">
+            The Milesight SG50-class gateways spec 2&nbsp;km (built-up) to 15&nbsp;km (rural) range, so the recommended 750&nbsp;m design is deliberately conservative — every point sits inside two or more cells for redundancy. A strict 200&nbsp;m assumption (worst-case dense canopy) leaves gaps and would need extra in-fill nodes; the mesh + raising antennas on short masts closes that easily on open moorland.
+          </p>
+        </div>
+
+        <div class="callout">
+          <strong>Why the circles overlap on purpose.</strong> Overlap isn't waste — it's resilience. Every gateway can hear the herd in its neighbour's cell, so if one node is shaded by a combe, blocked by weather, or down for maintenance, traffic simply re-routes through the mesh to the hub. No single point of failure across the grazing platform.
+        </div>
+      </div>
+    </div>
+
+    <!-- WRITE-UP -->
+    <div class="section-head reveal" style="margin-top:80px">
+      <span class="eyebrow"><span class="dot"></span>How it works &amp; what it costs</span>
+      <h2>The network, the herd, and the <span class="grad-text">bill of materials</span></h2>
+      <p>Indicative UK pricing for June 2026, ex-VAT, based on current market hardware. Starting with a 50-head herd on ~500 acres.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:stretch">
+      <div class="panel reveal">
+        <h3>1 · The LoRa gateways</h3>
+        <p class="desc">Five solar, off-grid LoRaWAN gateways — four corners + centre.</p>
+        <p style="color:var(--text-2);font-size:14.5px">Each gateway is an <strong>8-channel solar LoRaWAN gateway</strong> (Milesight SG50-class): built-in solar panel + battery (≈4 days autonomy without sun), IP67, with 2–15&nbsp;km rural range. They listen for every EID/sensor uplink in their cell and forward it on. Because they're solar they need no trenching for power — they just need a clear-ish spot and a short mast.</p>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Solar LoRaWAN gateway (SG50-class)</td><td class="num">5</td><td class="num">£700</td><td class="num">£3,500</td></tr>
+            <tr><td>High-gain antenna + short mast</td><td class="num">5</td><td class="num">£110</td><td class="num">£550</td></tr>
+            <tr><td>Surge protection &amp; earthing</td><td class="num">5</td><td class="num">£40</td><td class="num">£200</td></tr>
+            <tr class="tot"><td>Gateway subtotal</td><td class="num"></td><td class="num"></td><td class="num">£4,250</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel reveal">
+        <h3>2 · The smart-mesh retrofit</h3>
+        <p class="desc">Turning isolated gateways into one self-healing network.</p>
+        <p style="color:var(--text-2);font-size:14.5px">Out of the box each gateway would need its own cellular SIM to reach the internet. Instead we <strong>retrofit a smart mesh</strong>: a small <strong>5&nbsp;GHz mesh/point-to-point radio</strong> (Ubiquiti airMAX-class) on each gateway so they relay IP traffic peer-to-peer back to the central hub. The mesh is self-healing — if one hop drops, traffic reroutes automatically. Only the hub needs Starlink; no SIM per node. An optional <strong>Meshtastic</strong> layer adds ultra-low-power, infrastructure-free text alerts (gate, mortality, escape) as a backup channel.</p>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            <tr><td>5&nbsp;GHz mesh/PtP backhaul radio</td><td class="num">5</td><td class="num">£190</td><td class="num">£950</td></tr>
+            <tr><td>Mesh controller / PoE switch at hub</td><td class="num">1</td><td class="num">£130</td><td class="num">£130</td></tr>
+            <tr><td>Meshtastic resilience nodes (optional)</td><td class="num">3</td><td class="num">£60</td><td class="num">£180</td></tr>
+            <tr class="tot"><td>Mesh subtotal</td><td class="num"></td><td class="num"></td><td class="num">£1,260</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2" style="align-items:stretch;margin-top:26px">
+      <div class="panel reveal">
+        <h3>3 · The herd — 50 EID devices</h3>
+        <p class="desc">Identity for every animal, live location across the farm.</p>
+        <p style="color:var(--text-2);font-size:14.5px">There are two layers. <strong>Mandatory identity EID tags</strong> (BCMS-compliant, ~£2–£4 each) give each animal a unique ID and are read at the weigh-crate and race. For <strong>live location</strong> across 500 acres, <strong>LoRa solar GPS ear tags</strong> (≈£59 each) report position, movement and behaviour straight to the gateways — no per-tag SIM needed. Starting with a 50-head herd keeps the CapEx manageable while proving the full system.</p>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Identity EID ear tags (mandatory)</td><td class="num">50</td><td class="num">£3.50</td><td class="num">£175</td></tr>
+            <tr><td>LoRa solar GPS ear tags (location)</td><td class="num">50</td><td class="num">£59</td><td class="num">£2,950</td></tr>
+            <tr><td>Handheld / stick EID reader</td><td class="num">1</td><td class="num">£350</td><td class="num">£350</td></tr>
+            <tr class="tot"><td>Herd subtotal</td><td class="num"></td><td class="num"></td><td class="num">£3,475</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:10px">Scaling to 250 head later: add 200 more GPS tags at £59 each (£11,800) — the gateway infrastructure and hub are already in place and need no change.</p>
+      </div>
+
+      <div class="panel reveal">
+        <h3>4 · The central hub &amp; Starlink</h3>
+        <p class="desc">The brain of the farm, wired to the sky.</p>
+        <p style="color:var(--text-2);font-size:14.5px">At the farmhouse, a small <strong>edge server</strong> runs the LoRaWAN <strong>network server (self-hosted ChirpStack)</strong>, the vault sync, the Telegram bot and Whisper transcription. All gateway traffic arrives here over the mesh and goes out to the cloud/LLM via <strong>Starlink</strong> — the only internet uplink the farm needs. A UPS and small solar keep it alive through outages.</p>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Unit</th><th class="num">Total</th></tr></thead>
+          <tbody>
+            <tr><td>Starlink terminal (Standard / Business fixed)</td><td class="num">1</td><td class="num">£449</td><td class="num">£449</td></tr>
+            <tr><td>Edge server (mini-PC, ChirpStack + vault + bot)</td><td class="num">1</td><td class="num">£550</td><td class="num">£550</td></tr>
+            <tr><td>Hub UPS, enclosure &amp; solar top-up</td><td class="num">1</td><td class="num">£350</td><td class="num">£350</td></tr>
+            <tr><td>LoRaWAN network server (ChirpStack)</td><td class="num">1</td><td class="num">£0</td><td class="num">£0</td></tr>
+            <tr><td>Professional weather station</td><td class="num">1</td><td class="num">£600</td><td class="num">£600</td></tr>
+            <tr><td>Install, masts &amp; commissioning</td><td class="num">1</td><td class="num">£1,500</td><td class="num">£1,500</td></tr>
+            <tr class="tot"><td>Hub subtotal</td><td class="num"></td><td class="num"></td><td class="num">£3,449</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2" style="align-items:stretch;margin-top:26px">
+      <div class="panel reveal">
+        <h3>Indicative totals</h3>
+        <table class="tbl">
+          <thead><tr><th>Group</th><th class="num">CapEx (one-off)</th></tr></thead>
+          <tbody>
+            <tr><td>1 · LoRa gateways</td><td class="num">£4,250</td></tr>
+            <tr><td>2 · Smart-mesh retrofit</td><td class="num">£1,260</td></tr>
+            <tr><td>3 · Herd — 50 EID/GPS devices</td><td class="num">£3,475</td></tr>
+            <tr><td>4 · Hub, Starlink &amp; install</td><td class="num">£3,449</td></tr>
+            <tr class="tot"><td>Total indicative CapEx (50-head)</td><td class="num">≈ £12,434</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:10px">The gateway infrastructure and hub cover the full 500 acres regardless of herd size. Scaling from 50 to 250 head later costs only the additional GPS tags (£11,800) — no civil works, no new gateways.</p>
+      </div>
+
+      <div class="panel reveal">
+        <h3>Running costs (monthly)</h3>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th class="num">Monthly</th></tr></thead>
+          <tbody>
+            <tr><td>Starlink (Standard £75 / Business 1TB £156)</td><td class="num">£75–£156</td></tr>
+            <tr><td>Tracker platform / data (via own gateways)</td><td class="num">£20–£60</td></tr>
+            <tr><td>4G/LTE failover SIM (optional)</td><td class="num">£10</td></tr>
+            <tr><td>Maintenance &amp; tag replacement (amortised)</td><td class="num">≈ £90</td></tr>
+            <tr class="tot"><td>Typical OpEx</td><td class="num">≈ £200–£300</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:10px">LoRa GPS tags report through your own gateways, so there's no per-animal cellular bill — a major saving vs. 4G collars (~£260/head incl. first-year data).</p>
+      </div>
+    </div>
+
+    <p class="note">All figures are indicative June-2026 UK estimates (ex-VAT) from current market hardware, included to size the project — not formal quotes. Real LoRa range on Exmoor depends heavily on terrain, antenna height and foliage; a short site survey is recommended before final node placement.</p>
+  </div>
+</section>

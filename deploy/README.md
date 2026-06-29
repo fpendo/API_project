@@ -80,7 +80,7 @@ chmod +x deploy/deploy.sh
 
 ```bash
 # Set portal login credentials
-sudo nano /opt/app/portal/backend/.env
+sudo nano /opt/app/nemx/portal/backend/.env
 ```
 
 Add:
@@ -121,7 +121,7 @@ sudo apt install -y certbot python3-certbot-nginx
 ### 2. Set Up Application Structure
 
 ```bash
-sudo mkdir -p /opt/app/{nemx,portal}
+sudo mkdir -p /opt/app/nemx
 sudo mkdir -p /var/www/{portal,nemx}
 sudo chown -R $USER:$USER /opt/app
 ```
@@ -138,7 +138,7 @@ pip install -r requirements.txt
 ### 4. Install Portal Backend
 
 ```bash
-cd /opt/app/portal/backend
+cd /opt/app/nemx/portal/backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -148,7 +148,7 @@ pip install -r requirements.txt
 
 ```bash
 # Portal frontend
-cd /opt/app/portal/frontend
+cd /opt/app/nemx/portal/frontend
 npm ci
 npm run build
 sudo cp -r dist/* /var/www/portal/
