@@ -1,0 +1,39 @@
+# Personal Assistant - Phase 1 dependencies
+# Target: Python 3.12
+
+# Telegram bot framework (async)
+python-telegram-bot>=21,<23
+
+# Local, private speech-to-text
+faster-whisper>=1.0
+
+# Provider-agnostic LLM access - supports OpenAI, Anthropic (Claude),
+# Gemini, and 100+ others with a single interface. Switch providers by
+# changing LLM_PROVIDER and LLM_MODEL in .env.
+litellm>=1.40
+openai>=1.40
+
+# Google APIs (Gmail + Calendar)
+google-api-python-client>=2.140
+google-auth>=2.34
+google-auth-oauthlib>=1.2
+
+# Config
+python-dotenv>=1.0
+
+# Browser automation (school portal scraping)
+playwright>=1.44
+
+# Self-learning agentic web browsing (assistant/browsing/)
+# Note: browser-use pins openai==2.16.0 but works with newer; we install
+# openai>=2.20 afterwards to satisfy litellm.
+browser-use>=0.13
+
+# Web search (DuckDuckGo, no API key) + HTML text extraction
+ddgs>=9.0
+beautifulsoup4>=4.12
+
+# Web voice app (ChatGPT-style browser front-end for the assistant)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9

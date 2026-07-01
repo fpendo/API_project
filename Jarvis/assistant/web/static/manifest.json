@@ -1,0 +1,25 @@
+{
+  "name": "Jarvis",
+  "short_name": "Jarvis",
+  "description": "Your personal voice assistant",
+  "start_url": "/jarvis-voice/",
+  "scope": "/jarvis-voice/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b0d12",
+  "theme_color": "#7c5cff",
+  "icons": [
+    {
+      "src": "/jarvis-voice/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/jarvis-voice/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual env
+.venv/
+venv/
+env/
+
+# User data (tokens, conversation history, vault, credentials, screenshots)
+data/
+# ...except we DO want to track the skills folder structure (generated scripts)
+# but NOT credentials or tokens
+!data/skills/
+data/skills/**/*.json
+data/skills/**/meta.json
+
+# Personal vault — contains private documents, never commit
+vault/
+
+# Environment and secrets
+.env
+client_secret.json
+**/tokens/*.json
+**/token.json
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Test artefacts
+test_browse_e2e.py
+*.html
+*.ogg
+
+# Playwright cache (installed separately on each machine)
+# /root/.cache/ms-playwright  <- not inside project, no need to ignore here
