@@ -1,5 +1,6 @@
 import type {
-  AppConfig, DiscoveryJob, Lead, OutreachEmail, Photo, Project, Video,
+  AppConfig, DiscoveryJob, Lead, MailboxSettings, MailboxStatus, MailMessage,
+  MailThread, OutreachEmail, Photo, Project, Video,
 } from './types'
 
 // '/designo/api' in prod and dev (vite proxy handles dev)
@@ -26,6 +27,12 @@ const json = (method: string, body?: unknown): RequestInit => ({
 
 export const api = {
   config: () => request<AppConfig>('/config'),
+
+  // --- Auth ---
+  login: (password: string) =>
+    request<{ authenticated: boolean }>('/auth/login', json('POST', { password })),
+  logout: () => request<{ authenticated: boolean }>('/auth/logout', json('POST')),
+  authMe: () => request<{ authenticated: boolean }>('/auth/me'),
 
   listProjects: () => request<Project[]>('/projects'),
   getProject: (id: string) => request<Project>(`/projects/${id}`),
@@ -83,6 +90,8 @@ export const api = {
   approveLead: (id: string) => request<Lead>(`/leads/${id}/approve`, json('POST')),
   updateLeadEmail: (id: string, fields: { subject?: string; body_text?: string }) =>
     request<OutreachEmail>(`/leads/${id}/email`, json('PATCH', fields)),
+  sendWelcome: (id: string) => request<Lead>(`/leads/${id}/send-welcome`, json('POST')),
+  welcomePreviewUrl: (id: string) => `${API_BASE}/leads/${id}/welcome-preview`,
 
   discover: (body: { source: string; query?: string; sic_code?: string; days_back?: number; max_results?: number }) =>
     request<DiscoveryJob>('/leads/discover', json('POST', body)),
@@ -96,6 +105,26 @@ export const api = {
   leadSettings: () => request<Record<string, string>>('/leads/settings'),
   saveLeadSettings: (settings: Record<string, string>) =>
     request<Record<string, string>>('/leads/settings', json('PUT', { settings })),
+
+  // --- Mailbox ---
+  mailboxStatus: () => request<MailboxStatus>('/mailbox/status'),
+  mailboxSettings: () => request<MailboxSettings>('/mailbox/settings'),
+  saveMailboxSettings: (s: { imap_host?: string; imap_port?: string; imap_user?: string; imap_password?: string }) =>
+    request<MailboxSettings>('/mailbox/settings', json('PUT', s)),
+  mailboxTest: () => request<{ ok: boolean; detail: string }>('/mailbox/test', json('POST')),
+  mailboxPoll: () => request<{ fetched: number }>('/mailbox/poll', json('POST')),
+  mailboxThreads: () => request<MailThread[]>('/mailbox/threads'),
+  mailboxThread: (counterpart: string) =>
+    request<{ counterpart: string; lead: Lead | null; messages: MailMessage[] }>(
+      `/mailbox/thread?counterpart=${encodeURIComponent(counterpart)}`),
+  mailboxReply: (body: { counterpart: string; subject: string; body_text: string; lead_id?: string | null }) =>
+    request<MailMessage>('/mailbox/reply', json('POST', body)),
+  followupTemplate: (params: { lead_id?: string; counterpart?: string }) => {
+    const qs = new URLSearchParams()
+    if (params.lead_id) qs.set('lead_id', params.lead_id)
+    if (params.counterpart) qs.set('counterpart', params.counterpart)
+    return request<{ subject: string; body_text: string }>(`/mailbox/followup-template?${qs}`)
+  },
 
   leadMediaUrl: (leadId: string, name: 'hero.png' | 'scroll.gif', v?: number) =>
     `${API_BASE}/leads/${leadId}/media/${name}${v ? `?v=${v}` : ''}`,

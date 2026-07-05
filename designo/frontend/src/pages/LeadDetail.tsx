@@ -28,6 +28,17 @@ const EVENT_LABELS: Record<string, string> = {
   pricing_viewed: 'Saw the pricing panel',
   pricing_dismissed: 'Dismissed the pricing panel',
   pricing_cta: 'Clicked "reply by email"',
+  proposal_viewed: 'Viewed the proposal page',
+  checkout_initiated: 'Started checkout',
+  payment_received: 'Payment received (£695)',
+  subscription_created: 'Monthly subscription set up',
+  invoice_payment_failed: 'Payment failed',
+  subscription_cancelled: 'Subscription cancelled',
+  welcome_sent: 'Welcome pack sent',
+  welcome_send_failed: 'Welcome pack failed to send',
+  welcome_viewed: 'Viewed their welcome page',
+  email_reply_received: 'Replied — see Mailbox',
+  reply_sent: 'You replied',
 }
 
 function eventLabel(e: LeadEvent): string {
@@ -108,6 +119,11 @@ export default function LeadDetail() {
 
   const setStatus = (status: string) => act(() => api.updateLead(lead!.id, { status }))
 
+  const sendWelcome = () => {
+    if (!window.confirm('Send the welcome pack email to this lead now?')) return
+    act(() => api.sendWelcome(lead!.id))
+  }
+
   const remove = async () => {
     if (!lead) return
     if (!window.confirm(`Delete lead "${lead.business_name}" plus its mockup site and all tracking data?`)) return
@@ -156,6 +172,27 @@ export default function LeadDetail() {
             <a href={api.previewUrl(lead.project_id)} target="_blank" rel="noreferrer" className="btn-ghost !py-2 text-sm">
               Open mockup
             </a>
+          )}
+          {lead.access?.slug && ['sent', 'opened', 'logged_in', 'won'].includes(lead.status) && (
+            <a
+              href={`${config?.public_url ?? ''}/p/${lead.access.slug}/proposal/`}
+              target="_blank" rel="noreferrer"
+              className="btn-ghost !py-2 text-sm !border-amber-500/40 text-amber-400"
+            >
+              View proposal page ↗
+            </a>
+          )}
+          {lead.status === 'won' && (
+            <>
+              <a href={api.welcomePreviewUrl(lead.id)} target="_blank" rel="noreferrer"
+                className="btn-ghost !py-2 text-sm">
+                Preview welcome pack
+              </a>
+              <button className="btn-ghost !py-2 text-sm !border-emerald-500/40 text-emerald-400"
+                onClick={sendWelcome} disabled={busy}>
+                {(lead.events ?? []).some((e) => e.kind === 'welcome_sent') ? 'Re-send welcome pack' : 'Send welcome pack'}
+              </button>
+            </>
           )}
           <button onClick={remove} className="btn-ghost !py-2 text-sm !border-red-500/40 text-red-400" disabled={busy}>
             Delete

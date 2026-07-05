@@ -50,6 +50,19 @@ PUBLIC_URL = os.getenv("DESIGNO_PUBLIC_URL", "https://nemx.co.uk/designo").rstri
 # Secret for signing prospect sessions / unsubscribe tokens (auto-generated into
 # the settings table when empty).
 SECRET = os.getenv("DESIGNO_SECRET", "")
+# Admin (portal) password — falls back to the admin_password setting; a random
+# one is generated on first start if neither exists.
+ADMIN_PASSWORD = os.getenv("DESIGNO_ADMIN_PASSWORD", "")
+
+# --- Stripe payments ---
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+# Cached monthly Price ID — set automatically on first subscription checkout.
+STRIPE_MONTHLY_PRICE_ID = os.getenv("STRIPE_MONTHLY_PRICE_ID", "")
+# Build fee in pence (default £695). Monthly subscription fee (default £59).
+PRICE_BUILD_PENCE = int(os.getenv("DESIGNO_PRICE_BUILD_PENCE", "69500"))
+PRICE_MONTHLY_PENCE = int(os.getenv("DESIGNO_PRICE_MONTHLY_PENCE", "5900"))
 
 MAX_PHOTO_BYTES = int(os.getenv("DESIGNO_MAX_PHOTO_BYTES", str(15 * 1024 * 1024)))
 ALLOWED_PHOTO_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}

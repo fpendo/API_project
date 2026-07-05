@@ -67,11 +67,51 @@ export interface AppConfig {
   apify_enabled: boolean
   companies_house_enabled: boolean
   outreach_enabled: boolean
+  payments_enabled: boolean
+  price_build: string
+  price_monthly: string
   public_url: string
   video_models: { draft: string; final: string }
   llm_model: string
   photo_tags: string[]
   max_photo_bytes: number
+}
+
+export interface MailMessage {
+  id: string
+  lead_id: string | null
+  direction: 'in' | 'out'
+  counterpart: string
+  subject: string
+  body_text: string
+  body_html: string
+  message_id: string | null
+  in_reply_to: string | null
+  read: number
+  created_at: number
+}
+
+export interface MailThread extends MailMessage {
+  unread: number
+  business_name: string | null
+  lead_status: string | null
+}
+
+export interface MailboxStatus {
+  imap_configured: boolean
+  imap_host: string
+  imap_user: string
+  send_enabled: boolean
+  last_poll: number | null
+  last_error: string | null
+  unread: number
+}
+
+export interface MailboxSettings {
+  imap_host: string
+  imap_port: string
+  imap_user: string
+  imap_password_set: boolean
 }
 
 export type LeadStatus =

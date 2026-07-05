@@ -2,14 +2,15 @@
 import io
 import logging
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 from PIL import Image
 
-from . import (config, db, generator, lead_agent, leads_db, outreach,
-               preview_media, prospect, retouch, sources, storage, video)
+from . import (auth, config, db, generator, lead_agent, leads_db, mailbox,
+               outreach, payments, preview_media, prospect, retouch, sources,
+               storage, video, welcome)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 log = logging.getLogger("designo")
@@ -25,7 +26,10 @@ app.add_middleware(
 
 db.init_db()
 leads_db.init_db()
+auth.ensure_password()
 app.include_router(prospect.router)
+app.middleware("http")(auth.middleware)
+mailbox.start_poller()
 
 PHOTO_TAGS = ["hero", "product", "team", "gallery", "background", "texture", "logo", "artwork"]
 
@@ -90,6 +94,24 @@ class SettingsUpdate(BaseModel):
     settings: dict[str, str]
 
 
+class MailboxSettings(BaseModel):
+    imap_host: str | None = None
+    imap_port: str | None = None
+    imap_user: str | None = None
+    imap_password: str | None = None
+
+
+class MailReply(BaseModel):
+    counterpart: str
+    subject: str
+    body_text: str
+    lead_id: str | None = None
+
+
+class LoginRequest(BaseModel):
+    password: str
+
+
 # --- Helpers ---
 
 def _get_project_or_404(project_id: str) -> dict:
@@ -116,6 +138,33 @@ def health():
     return {"status": "ok", "service": "designo"}
 
 
+# --- Auth ---
+
+@app.post("/api/auth/login")
+def login(body: LoginRequest):
+    if not auth.check_password(body.password):
+        raise HTTPException(401, "wrong password")
+    from fastapi.responses import JSONResponse
+    resp = JSONResponse({"authenticated": True})
+    resp.set_cookie(auth.COOKIE_NAME, auth.make_session(),
+                    max_age=auth.SESSION_TTL_S, httponly=True, samesite="lax",
+                    secure=config.PUBLIC_URL.startswith("https"), path="/")
+    return resp
+
+
+@app.get("/api/auth/me")
+def auth_me(request: Request):
+    return {"authenticated": auth.check_session(request)}
+
+
+@app.post("/api/auth/logout")
+def logout():
+    from fastapi.responses import JSONResponse
+    resp = JSONResponse({"authenticated": False})
+    resp.delete_cookie(auth.COOKIE_NAME, path="/")
+    return resp
+
+
 @app.get("/api/config")
 def get_config():
     return {
@@ -125,6 +174,9 @@ def get_config():
         "apify_enabled": sources.apify_enabled(),
         "companies_house_enabled": sources.companies_house_enabled(),
         "outreach_enabled": outreach.enabled(),
+        "payments_enabled": payments.enabled(),
+        "price_build": f"£{config.PRICE_BUILD_PENCE // 100}",
+        "price_monthly": f"£{config.PRICE_MONTHLY_PENCE // 100}",
         "public_url": config.PUBLIC_URL,
         "llm_model": config.LLM_MODEL,
         "photo_tags": PHOTO_TAGS,
@@ -291,8 +343,8 @@ def generate_site(project_id: str):
     project = _get_project_or_404(project_id)
     if project["status"] == "generating":
         raise HTTPException(409, "generation already in progress")
-    if not db.list_photos(project_id):
-        raise HTTPException(400, "upload at least one photo before generating")
+    # Zero photos is fine — the creative director commissions AI artwork instead
+    # (same path the lead-gen mockups use).
     try:
         generator.start_generation(project_id)
     except RuntimeError as exc:
@@ -477,6 +529,161 @@ async def resend_webhook(request: Request):
     return {"ok": True}
 
 
+@app.post("/api/leads/{lead_id}/send-welcome")
+def send_welcome(lead_id: str):
+    """Send (or re-send) the welcome pack — normally automatic after payment."""
+    lead = _get_lead_or_404(lead_id)
+    try:
+        welcome.send(lead["id"])
+    except (RuntimeError, FileNotFoundError) as exc:
+        raise HTTPException(400, str(exc))
+    return _lead_payload(leads_db.get_lead(lead_id), full=True)
+
+
+@app.get("/api/leads/{lead_id}/welcome-preview", response_class=HTMLResponse)
+def welcome_preview(lead_id: str):
+    lead = _get_lead_or_404(lead_id)
+    return HTMLResponse(welcome.render_email(lead))
+
+
+# --- Documents (template previews with sample data) ---
+
+_SAMPLE_LEAD = {
+    "id": "__sample__",
+    "business_name": "Harper & Sons Roofing",
+    "category": "roofing contractor",
+    "town": "Shrewsbury",
+    "email": "sample@example.com",
+    "reply_to": "",
+}
+
+
+@app.get("/api/documents/proposal", response_class=HTMLResponse)
+def document_proposal():
+    """The follow-up pack: proposal page incl. the sample weekly SEO report."""
+    build_fee = leads_db.get_setting("pricing_build_fee") or "£695"
+    monthly_fee = (leads_db.get_setting("pricing_monthly_fee") or "£59/month").split("/")[0].strip()
+    from . import proposal as proposal_mod
+    return HTMLResponse(proposal_mod.render_proposal(
+        lead={**_SAMPLE_LEAD, "reply_to": config.OUTREACH_REPLY_TO},
+        access={"slug": "sample"},
+        public_url=config.PUBLIC_URL,
+        build_fee=build_fee.split(" ")[0],
+        monthly_fee=monthly_fee,
+    ))
+
+
+@app.get("/api/documents/welcome", response_class=HTMLResponse)
+def document_welcome():
+    """The welcome pack email, as the client receives it after paying."""
+    return HTMLResponse(welcome.render_email(_SAMPLE_LEAD))
+
+
+@app.get("/api/documents/followup-email")
+def document_followup_email():
+    """The canned package follow-up reply used from the Mailbox."""
+    return mailbox.followup_template(None)
+
+
+# --- Mailbox ---
+
+@app.get("/api/mailbox/status")
+def mailbox_status():
+    return mailbox.status()
+
+
+@app.get("/api/mailbox/settings")
+def mailbox_settings():
+    return {
+        "imap_host": leads_db.get_setting("mailbox_imap_host"),
+        "imap_port": leads_db.get_setting("mailbox_imap_port") or "993",
+        "imap_user": leads_db.get_setting("mailbox_imap_user"),
+        "imap_password_set": bool(leads_db.get_setting("mailbox_imap_password")),
+    }
+
+
+@app.put("/api/mailbox/settings")
+def save_mailbox_settings(body: MailboxSettings):
+    mapping = {
+        "imap_host": "mailbox_imap_host",
+        "imap_port": "mailbox_imap_port",
+        "imap_user": "mailbox_imap_user",
+        "imap_password": "mailbox_imap_password",
+    }
+    for field, key in mapping.items():
+        value = getattr(body, field)
+        if value is not None:
+            leads_db.set_setting(key, value.strip())
+    # Changing the account invalidates the UID cursor.
+    if body.imap_host is not None or body.imap_user is not None:
+        leads_db.set_setting("mailbox_last_uid", "0")
+    return mailbox_settings()
+
+
+@app.post("/api/mailbox/test")
+def mailbox_test():
+    return mailbox.test_connection()
+
+
+@app.post("/api/mailbox/poll")
+def mailbox_poll():
+    try:
+        return mailbox.poll_now()
+    except Exception as exc:
+        raise HTTPException(502, str(exc))
+
+
+@app.get("/api/mailbox/threads")
+def mailbox_threads():
+    threads = leads_db.list_mail_threads()
+    # Attach business names for matched leads
+    for t in threads:
+        if t.get("lead_id"):
+            lead = leads_db.get_lead(t["lead_id"])
+            t["business_name"] = lead["business_name"] if lead else None
+            t["lead_status"] = lead["status"] if lead else None
+        else:
+            t["business_name"] = None
+            t["lead_status"] = None
+    return threads
+
+
+@app.get("/api/mailbox/thread")
+def mailbox_thread(counterpart: str):
+    messages = leads_db.list_mail_for_counterpart(counterpart)
+    if not messages:
+        raise HTTPException(404, "no messages for this address")
+    leads_db.mark_mail_read(counterpart)
+    lead = leads_db.find_lead_by_email(counterpart)
+    return {
+        "counterpart": counterpart.strip().lower(),
+        "lead": _lead_payload(lead) if lead else None,
+        "messages": messages,
+    }
+
+
+@app.post("/api/mailbox/reply")
+def mailbox_reply(body: MailReply):
+    if not body.body_text.strip():
+        raise HTTPException(400, "reply is empty")
+    if not body.subject.strip():
+        raise HTTPException(400, "subject is empty")
+    try:
+        return mailbox.send_reply(body.counterpart, body.subject.strip(),
+                                  body.body_text.strip(), lead_id=body.lead_id)
+    except RuntimeError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.get("/api/mailbox/followup-template")
+def mailbox_followup_template(lead_id: str | None = None, counterpart: str | None = None):
+    """Canned package response; resolves the lead from the address if needed."""
+    if not lead_id and counterpart:
+        lead = leads_db.find_lead_by_email(counterpart)
+        lead_id = lead["id"] if lead else None
+    return mailbox.followup_template(lead_id)
+
+
 @app.get("/api/leads/{lead_id}")
 def get_lead(lead_id: str):
     return _lead_payload(_get_lead_or_404(lead_id), full=True)
@@ -576,6 +783,23 @@ def lead_media(lead_id: str, name: str):
     if not path:
         raise HTTPException(404, "media not found")
     return FileResponse(path, media_type="image/png" if name.endswith(".png") else "image/gif")
+
+
+# --- Stripe webhook (raw body required for signature verification) ---
+
+@app.post("/api/payments/webhook")
+async def stripe_webhook(request: Request,
+                         stripe_signature: str = Header(None, alias="stripe-signature")):
+    """Receive Stripe webhook events — payment & subscription lifecycle."""
+    if not payments.enabled():
+        raise HTTPException(503, "payments not configured")
+    payload = await request.body()
+    try:
+        payments.handle_webhook(payload, stripe_signature or "")
+    except ValueError as exc:
+        log.warning("stripe webhook rejected: %s", exc)
+        raise HTTPException(400, str(exc))
+    return {"ok": True}
 
 
 # --- Preview & export ---

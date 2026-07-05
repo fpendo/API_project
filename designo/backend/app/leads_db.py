@@ -83,11 +83,26 @@ CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS mail_messages (
+    id TEXT PRIMARY KEY,
+    lead_id TEXT REFERENCES leads(id) ON DELETE SET NULL,
+    direction TEXT NOT NULL,              -- 'in' | 'out'
+    counterpart TEXT NOT NULL DEFAULT '', -- the prospect's email address
+    subject TEXT NOT NULL DEFAULT '',
+    body_text TEXT NOT NULL DEFAULT '',
+    body_html TEXT NOT NULL DEFAULT '',
+    message_id TEXT,                      -- RFC 5322 Message-ID (dedupe + threading)
+    in_reply_to TEXT,
+    read INTEGER NOT NULL DEFAULT 0,
+    created_at REAL NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_mail_counterpart ON mail_messages (counterpart, created_at);
 """
 
 DEFAULT_SETTINGS = {
-    "pricing_build_fee": "£495 one-off",
-    "pricing_monthly_fee": "£39/month hosting, updates & SEO",
+    "pricing_build_fee": "£695 one-off",
+    "pricing_monthly_fee": "£59/month hosting, updates & SEO",
     "sender_name": "Designo Studio",
     "sender_signoff": "The Designo Studio team",
 }
@@ -295,6 +310,117 @@ def is_suppressed(email: str) -> bool:
         ).fetchone() is not None
 
 
+# --- mailbox ---
+
+def add_mail_message(direction: str, counterpart: str, subject: str,
+                     body_text: str = "", body_html: str = "",
+                     lead_id: str | None = None, message_id: str | None = None,
+                     in_reply_to: str | None = None, read: bool = False,
+                     created_at: float | None = None) -> dict:
+    msg_id = uuid.uuid4().hex
+    with _lock, _connect() as conn:
+        conn.execute(
+            "INSERT INTO mail_messages (id, lead_id, direction, counterpart, subject, "
+            "body_text, body_html, message_id, in_reply_to, read, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (msg_id, lead_id, direction, counterpart.strip().lower(), subject,
+             body_text, body_html, message_id, in_reply_to, int(read),
+             created_at or time.time()),
+        )
+    return get_mail_message(msg_id)
+
+
+def get_mail_message(msg_id: str) -> dict | None:
+    with _lock, _connect() as conn:
+        row = conn.execute("SELECT * FROM mail_messages WHERE id = ?", (msg_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def mail_message_id_exists(message_id: str) -> bool:
+    if not message_id:
+        return False
+    with _lock, _connect() as conn:
+        return conn.execute(
+            "SELECT 1 FROM mail_messages WHERE message_id = ?", (message_id,)
+        ).fetchone() is not None
+
+
+def list_mail_threads() -> list[dict]:
+    """One row per counterpart address: latest message + unread count + lead link."""
+    with _lock, _connect() as conn:
+        rows = conn.execute(
+            """
+            SELECT m.* FROM mail_messages m
+            JOIN (
+                SELECT counterpart, MAX(created_at) AS latest
+                FROM mail_messages GROUP BY counterpart
+            ) t ON m.counterpart = t.counterpart AND m.created_at = t.latest
+            ORDER BY m.created_at DESC
+            """
+        ).fetchall()
+        unread = {
+            r["counterpart"]: r["n"]
+            for r in conn.execute(
+                "SELECT counterpart, COUNT(*) AS n FROM mail_messages "
+                "WHERE direction = 'in' AND read = 0 GROUP BY counterpart"
+            ).fetchall()
+        }
+    threads = []
+    for r in rows:
+        d = dict(r)
+        d["unread"] = unread.get(d["counterpart"], 0)
+        threads.append(d)
+    return threads
+
+
+def list_mail_for_counterpart(counterpart: str) -> list[dict]:
+    with _lock, _connect() as conn:
+        rows = conn.execute(
+            "SELECT * FROM mail_messages WHERE counterpart = ? ORDER BY created_at ASC",
+            (counterpart.strip().lower(),),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def mark_mail_read(counterpart: str) -> None:
+    with _lock, _connect() as conn:
+        conn.execute(
+            "UPDATE mail_messages SET read = 1 WHERE counterpart = ? AND direction = 'in'",
+            (counterpart.strip().lower(),),
+        )
+
+
+def unread_mail_count() -> int:
+    with _lock, _connect() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS n FROM mail_messages WHERE direction = 'in' AND read = 0"
+        ).fetchone()
+    return row["n"] if row else 0
+
+
+def latest_inbound_message_id(counterpart: str) -> str | None:
+    """Most recent inbound RFC Message-ID for threading replies."""
+    with _lock, _connect() as conn:
+        row = conn.execute(
+            "SELECT message_id FROM mail_messages WHERE counterpart = ? AND direction = 'in' "
+            "AND message_id IS NOT NULL ORDER BY created_at DESC LIMIT 1",
+            (counterpart.strip().lower(),),
+        ).fetchone()
+    return row["message_id"] if row else None
+
+
+def find_lead_by_email(email: str) -> dict | None:
+    email = email.strip().lower()
+    if not email:
+        return None
+    with _lock, _connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM leads WHERE LOWER(TRIM(email)) = ? ORDER BY updated_at DESC LIMIT 1",
+            (email,),
+        ).fetchone()
+    return _row_to_lead(row) if row else None
+
+
 # --- settings ---
 
 def get_setting(key: str, default: str = "") -> str:
@@ -309,6 +435,7 @@ def set_setting(key: str, value: str) -> None:
 
 
 def all_settings() -> dict:
+    hidden = {"secret", "mailbox_imap_password"}
     with _lock, _connect() as conn:
         rows = conn.execute("SELECT key, value FROM settings").fetchall()
-    return {r["key"]: r["value"] for r in rows if r["key"] != "secret"}
+    return {r["key"]: r["value"] for r in rows if r["key"] not in hidden}

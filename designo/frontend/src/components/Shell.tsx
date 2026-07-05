@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../api'
 
 export function Logo({ size = 'md' }: { size?: 'sm' | 'md' }) {
   const box = size === 'sm' ? 'w-8 h-8 rounded-lg' : 'w-10 h-10 rounded-xl'
@@ -16,6 +17,11 @@ export function Logo({ size = 'md' }: { size?: 'sm' | 'md' }) {
 }
 
 export default function Shell({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+  const navigate = useNavigate()
+  const logout = async () => {
+    try { await api.logout() } catch { /* session may already be gone */ }
+    navigate('/')
+  }
   return (
     <div className="min-h-screen relative">
       <div className="fixed inset-0 bg-background">
@@ -34,12 +40,21 @@ export default function Shell({ children, wide = false }: { children: ReactNode;
               <Link to="/leads" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
                 Leads
               </Link>
+              <Link to="/mailbox" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
+                Mailbox
+              </Link>
+              <Link to="/documents" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
+                Documents
+              </Link>
               <Link to="/create" className="btn-primary !px-4 !py-2 text-sm">
                 Create Website
               </Link>
               <a href="/" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
                 Portal
               </a>
+              <button onClick={logout} className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
+                Log out
+              </button>
             </nav>
           </div>
         </header>

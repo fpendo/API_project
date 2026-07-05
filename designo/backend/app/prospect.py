@@ -19,7 +19,8 @@ import time
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
 
-from . import config, db, leads_db, outreach, preview_media, storage
+from . import (config, db, leads_db, outreach, payments, preview_media,
+               proposal, storage, welcome)
 
 log = logging.getLogger("designo.prospect")
 
@@ -165,6 +166,101 @@ async def collect_event(slug: str, request: Request):
     return Response(status_code=204)
 
 
+# --- follow-up pack: proposal page, Stripe checkout, thank-you ---
+
+@router.get("/{slug}/proposal", response_class=HTMLResponse)
+@router.get("/{slug}/proposal/", response_class=HTMLResponse)
+def proposal_page(slug: str, request: Request):
+    access = _access_or_404(slug)
+    if not _check_session(request, slug):
+        return HTMLResponse(_login_page(
+            (leads_db.get_lead(access["lead_id"]) or {}).get("business_name", ""),
+        ))
+    lead, _ = _lead_project(access)
+    _log_deduped(lead["id"], "proposal_viewed", window_s=3600)
+
+    pay_url = subscribe_url = ""
+    if payments.enabled():
+        try:
+            pay_url = payments.create_one_off_session(lead["id"], slug, config.PUBLIC_URL)
+            subscribe_url = payments.create_subscription_session(lead["id"], slug, config.PUBLIC_URL)
+        except Exception as exc:
+            log.warning("Stripe session creation failed for lead %s: %s", lead["id"], exc)
+
+    build_fee = leads_db.get_setting("pricing_build_fee") or "£695"
+    monthly_fee = leads_db.get_setting("pricing_monthly_fee") or "£59/month"
+    # Strip trailing /month from the stored setting if present (proposal renders it separately)
+    monthly_fee_bare = monthly_fee.split("/")[0].strip()
+
+    html = proposal.render_proposal(
+        lead={**lead, "reply_to": config.OUTREACH_REPLY_TO},
+        access=access,
+        pay_url=pay_url,
+        subscribe_url=subscribe_url,
+        public_url=config.PUBLIC_URL,
+        build_fee=build_fee,
+        monthly_fee=monthly_fee_bare,
+    )
+    return HTMLResponse(html)
+
+
+@router.post("/{slug}/pay")
+def pay_redirect(slug: str, request: Request):
+    """Create a Stripe Checkout session for the one-off build fee and redirect."""
+    access = _access_or_404(slug)
+    if not _check_session(request, slug):
+        raise HTTPException(401, "login required")
+    lead, _ = _lead_project(access)
+    if not payments.enabled():
+        raise HTTPException(503, "payment processing is not configured")
+    try:
+        url = payments.create_one_off_session(lead["id"], slug, config.PUBLIC_URL)
+    except Exception as exc:
+        log.error("Stripe one-off session error for lead %s: %s", lead["id"], exc)
+        raise HTTPException(502, "could not create payment session")
+    return RedirectResponse(url, status_code=303)
+
+
+@router.post("/{slug}/subscribe")
+def subscribe_redirect(slug: str, request: Request):
+    """Create a Stripe Checkout session for the monthly BACS subscription and redirect."""
+    access = _access_or_404(slug)
+    if not _check_session(request, slug):
+        raise HTTPException(401, "login required")
+    lead, _ = _lead_project(access)
+    if not payments.enabled():
+        raise HTTPException(503, "payment processing is not configured")
+    try:
+        url = payments.create_subscription_session(lead["id"], slug, config.PUBLIC_URL)
+    except Exception as exc:
+        log.error("Stripe subscription session error for lead %s: %s", lead["id"], exc)
+        raise HTTPException(502, "could not create subscription session")
+    return RedirectResponse(url, status_code=303)
+
+
+@router.get("/{slug}/welcome", response_class=HTMLResponse)
+@router.get("/{slug}/welcome/", response_class=HTMLResponse)
+def welcome_page(slug: str, request: Request):
+    access = _access_or_404(slug)
+    if not _check_session(request, slug):
+        return HTMLResponse(_login_page(
+            (leads_db.get_lead(access["lead_id"]) or {}).get("business_name", ""),
+        ))
+    lead, _ = _lead_project(access)
+    _log_deduped(lead["id"], "welcome_viewed", window_s=3600)
+    return HTMLResponse(welcome.render_page(lead, access))
+
+
+@router.get("/{slug}/thank-you", response_class=HTMLResponse)
+def thank_you(slug: str, request: Request, payment: str = "", setup: str = ""):
+    access = _access_or_404(slug)
+    if not _check_session(request, slug):
+        return RedirectResponse(f"{config.PUBLIC_URL}/p/{slug}/", status_code=303)
+    lead, _ = _lead_project(access)
+    payment_type = "setup" if setup else "payment"
+    return HTMLResponse(proposal.render_thank_you(lead, payment_type=payment_type))
+
+
 @router.get("/{slug}/{asset_path:path}")
 def site_asset(slug: str, asset_path: str, request: Request):
     access = _access_or_404(slug)
@@ -255,8 +351,13 @@ def _inject_overlay(site_html: str, lead: dict) -> str:
   <p style="margin:0 0 8px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a887f;">Like what you see?</p>
   <p style="margin:0 0 10px;font-size:15px;line-height:1.55;">This site is ready to go live for {esc(lead['business_name'])}.</p>
   <p style="margin:0 0 4px;font-size:14px;"><strong>{build_fee}</strong> to launch</p>
-  <p style="margin:0 0 12px;font-size:14px;"><strong>{monthly_fee}</strong></p>
-  <p style="margin:0;font-size:14px;line-height:1.5;">{contact_line}</p>
+  <p style="margin:0 0 14px;font-size:14px;"><strong>{monthly_fee}</strong></p>
+  <a href="proposal/" onclick="window.__dpev('pricing_cta')"
+     style="display:block;text-align:center;background:#141313;color:#efeeea;text-decoration:none;
+     border-radius:999px;font-family:Georgia,serif;font-size:14px;padding:10px 16px;margin-bottom:10px;">
+    See full proposal &amp; pricing →
+  </a>
+  <p style="margin:0;font-size:13px;color:#8a887f;line-height:1.5;">{contact_line}</p>
 </div>
 <script>
 (function() {{

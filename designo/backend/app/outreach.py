@@ -180,6 +180,12 @@ def send_email(email_id: str) -> dict:
                           error=None, sent_at=_time.time())
     leads_db.update_lead(lead["id"], status="sent", status_detail=None)
     leads_db.add_event(lead["id"], "email_sent", {"to": to_addr, "resend_id": resend_id})
+    # Mirror into the Mailbox sent items so the whole conversation lives in one place.
+    leads_db.add_mail_message(
+        direction="out", counterpart=to_addr, subject=record["subject"],
+        body_text=record["body_text"], body_html=html,
+        lead_id=lead["id"], read=True,
+    )
     log.info("lead %s: email sent to %s (%s)", lead["id"], to_addr, resend_id)
     return leads_db.get_email(email_id)
 

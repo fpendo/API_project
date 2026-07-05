@@ -13,6 +13,7 @@ import json
 import logging
 import re
 import threading
+import time
 
 import anthropic
 
@@ -66,8 +67,9 @@ def _extract_json(text: str) -> dict:
 
 
 def call_claude_json(messages: list[dict], system: str, max_tokens: int | None = None,
-                     attempts: int = 2) -> dict:
-    """Call Claude expecting JSON; retry once on malformed output."""
+                     attempts: int = 3) -> dict:
+    """Call Claude expecting JSON; retry on malformed output. Failed raw
+    responses are dumped to /tmp/designo_bad_json_*.txt for diagnosis."""
     last_exc: Exception | None = None
     for attempt in range(attempts):
         raw = _call_claude(messages, system=system, max_tokens=max_tokens)
@@ -75,7 +77,14 @@ def call_claude_json(messages: list[dict], system: str, max_tokens: int | None =
             return _extract_json(raw)
         except (ValueError, json.JSONDecodeError) as exc:
             last_exc = exc
-            log.warning("JSON parse failed (attempt %d/%d): %s", attempt + 1, attempts, exc)
+            dump = f"/tmp/designo_bad_json_{int(time.time())}_{attempt}.txt"
+            try:
+                with open(dump, "w", encoding="utf-8") as fh:
+                    fh.write(raw)
+            except OSError:
+                dump = "(dump failed)"
+            log.warning("JSON parse failed (attempt %d/%d): %s — raw saved to %s",
+                        attempt + 1, attempts, exc, dump)
     raise ValueError(f"model returned malformed JSON after {attempts} attempts: {last_exc}")
 
 
@@ -120,8 +129,10 @@ def _develop_concept(project_id: str) -> dict:
 
     _set_phase(project_id, "Studying the industry & developing the creative concept")
     prompt = skill.build_concept_prompt(project["brief"], photos)
+    # 16k: rich briefs (esp. photo-less ones that commission 6-10 artworks with
+    # detailed prompts) were truncating at 8k, producing malformed JSON.
     concept = call_claude_json(
-        [{"role": "user", "content": prompt}], system=skill.CONCEPT_SKILL, max_tokens=8000,
+        [{"role": "user", "content": prompt}], system=skill.CONCEPT_SKILL, max_tokens=16000,
     )
     _concept_path(project_id).write_text(json.dumps(concept, indent=2), encoding="utf-8")
     log.info("project %s: concept '%s'", project_id,

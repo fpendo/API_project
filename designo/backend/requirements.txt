@@ -19,3 +19,6 @@ Pillow>=10.0
 # Lead-gen: headless Chromium for email preview media (hero screenshot + scroll GIF)
 # After install run: playwright install chromium --with-deps
 playwright>=1.60
+
+# Stripe: payment links for one-off build fee and monthly BACS subscription
+stripe>=8.0
