@@ -82,3 +82,6 @@ htmlcov/
 # Embedded repos
 nemx/
 nemx_1/
+
+# Designo ringfenced storage (client photos, generated sites, analytics DB)
+designo/storage/
