@@ -46,6 +46,9 @@ export default function Shell({ children, wide = false }: { children: ReactNode;
               <Link to="/documents" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
                 Documents
               </Link>
+              <Link to="/playbook" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
+                Playbook
+              </Link>
               <Link to="/create" className="btn-primary !px-4 !py-2 text-sm">
                 Create Website
               </Link>

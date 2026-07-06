@@ -10,6 +10,7 @@ import Leads from './pages/Leads'
 import LeadDetail from './pages/LeadDetail'
 import Mailbox from './pages/Mailbox'
 import Documents from './pages/Documents'
+import Playbook from './pages/Playbook'
 import RequireAuth from './components/RequireAuth'
 
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/leads/:id" element={guard(<LeadDetail />)} />
         <Route path="/mailbox" element={guard(<Mailbox />)} />
         <Route path="/documents" element={guard(<Documents />)} />
+        <Route path="/playbook" element={guard(<Playbook />)} />
       </Routes>
     </BrowserRouter>
   )
