@@ -70,10 +70,21 @@ export default function Leads() {
     return () => clearInterval(t)
   }, [busy, job, refresh])
 
-  const visible = (leads ?? []).filter((l) => {
-    const f = FILTERS.find((x) => x.id === filter)
-    return !f?.statuses || f.statuses.includes(l.status)
-  })
+  // Worst site first — biggest opportunities at the top; leads without an
+  // audited website (no-website leads etc.) follow, newest first.
+  const visible = (leads ?? [])
+    .filter((l) => {
+      const f = FILTERS.find((x) => x.id === filter)
+      return !f?.statuses || f.statuses.includes(l.status)
+    })
+    .sort((a, b) => {
+      const sa = a.opportunity_score
+      const sb = b.opportunity_score
+      if (sa != null && sb != null && sb !== sa) return sb - sa
+      if (sa != null && sb == null) return -1
+      if (sa == null && sb != null) return 1
+      return b.created_at - a.created_at
+    })
 
   const counts = (statuses: LeadStatus[] | null) =>
     statuses === null ? (leads ?? []).length : (leads ?? []).filter((l) => statuses.includes(l.status)).length
@@ -127,6 +138,15 @@ export default function Leads() {
               transition={{ duration: 0.25, delay: Math.min(i * 0.03, 0.3) }}>
               <Link to={`/leads/${l.id}`}
                 className="glass-card px-5 py-4 flex items-center gap-4 hover:border-accent-primary/50 transition-colors duration-200 block">
+                {l.opportunity_score != null && (
+                  <div className={`shrink-0 w-14 h-14 rounded-xl border flex flex-col items-center justify-center ${
+                    l.opportunity_score >= 60 ? 'border-red-500/50 bg-red-500/10 text-red-300'
+                    : l.opportunity_score >= 40 ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+                    : 'border-slate-500/40 bg-slate-500/10 text-slate-300'}`}>
+                    <span className="font-display font-bold text-lg leading-none">{l.opportunity_score}</span>
+                    <span className="text-[9px] font-mono uppercase tracking-wider mt-1 opacity-70">opp.</span>
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="font-display font-semibold truncate">{l.business_name}</span>
@@ -159,8 +179,10 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
   onJob: (j: DiscoveryJob) => void
   onImported: () => void
 }) {
-  const [source, setSource] = useState<'apify' | 'companies_house'>('apify')
+  const [source, setSource] = useState<'apify' | 'sweep' | 'companies_house'>('apify')
+  const [mode, setMode] = useState<'no_website' | 'old_website'>('no_website')
   const [query, setQuery] = useState('')
+  const [categories, setCategories] = useState('')
   const [sic, setSic] = useState('')
   const [daysBack, setDaysBack] = useState(30)
   const [max, setMax] = useState(30)
@@ -172,13 +194,19 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
     setBusy(true)
     setError(null)
     try {
-      const j = await api.discover({
-        source,
-        query,
-        sic_code: sic,
-        days_back: daysBack,
-        max_results: max,
-      })
+      const j = source === 'sweep'
+        ? await api.sweep({
+            categories: categories.split(',').map((c) => c.trim()).filter(Boolean),
+            max_per_search: Math.min(max, 25),
+          })
+        : await api.discover({
+            source,
+            query,
+            mode,
+            sic_code: sic,
+            days_back: daysBack,
+            max_results: max,
+          })
       onJob(j)
     } catch (e) {
       setError((e as Error).message)
@@ -202,8 +230,10 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
     }
   }
 
-  const sourceReady = source === 'apify' ? config?.apify_enabled : config?.companies_house_enabled
-  const keyName = source === 'apify' ? 'APIFY_TOKEN' : 'COMPANIES_HOUSE_KEY'
+  const sourceReady = source === 'companies_house'
+    ? config?.companies_house_enabled
+    : config?.apify_enabled
+  const keyName = source === 'companies_house' ? 'COMPANIES_HOUSE_KEY' : 'APIFY_TOKEN'
 
   return (
     <div className="glass-card p-6 mb-8">
@@ -212,16 +242,35 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
         <div>
           <label className="block text-xs font-medium text-text-secondary mb-1.5">Source</label>
           <select className="input-field !py-2 text-sm !w-auto" value={source}
-            onChange={(e) => setSource(e.target.value as 'apify' | 'companies_house')}>
+            onChange={(e) => setSource(e.target.value as 'apify' | 'sweep' | 'companies_house')}>
             <option value="apify">Google Maps (via Apify)</option>
+            <option value="sweep">South West sweep (dated sites, services only)</option>
             <option value="companies_house">Companies House (new companies)</option>
           </select>
         </div>
         {source === 'apify' ? (
+          <>
+            <div>
+              <label className="block text-xs font-medium text-text-secondary mb-1.5">Target</label>
+              <select className="input-field !py-2 text-sm !w-auto" value={mode}
+                onChange={(e) => setMode(e.target.value as 'no_website' | 'old_website')}>
+                <option value="no_website">No website at all</option>
+                <option value="old_website">Dated website (modernise)</option>
+              </select>
+            </div>
+            <div className="flex-1 min-w-56">
+              <label className="block text-xs font-medium text-text-secondary mb-1.5">Search</label>
+              <input className="input-field !py-2 text-sm" placeholder='e.g. "plumbers in Shrewsbury"'
+                value={query} onChange={(e) => setQuery(e.target.value)} />
+            </div>
+          </>
+        ) : source === 'sweep' ? (
           <div className="flex-1 min-w-56">
-            <label className="block text-xs font-medium text-text-secondary mb-1.5">Search</label>
-            <input className="input-field !py-2 text-sm" placeholder='e.g. "plumbers in Shrewsbury"'
-              value={query} onChange={(e) => setQuery(e.target.value)} />
+            <label className="block text-xs font-medium text-text-secondary mb-1.5">
+              Service categories (comma-separated, swept across 27 SW towns)
+            </label>
+            <input className="input-field !py-2 text-sm" placeholder='e.g. "plumbers, electricians"'
+              value={categories} onChange={(e) => setCategories(e.target.value)} />
           </div>
         ) : (
           <>
@@ -249,7 +298,10 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
           </select>
         </div>
         <button className="btn-primary !py-2.5 text-sm" onClick={run}
-          disabled={busy || !sourceReady || (source === 'apify' ? !query.trim() : !sic.trim())}>
+          disabled={busy || !sourceReady || (
+            source === 'apify' ? !query.trim()
+            : source === 'sweep' ? !categories.trim()
+            : !sic.trim())}>
           Run discovery
         </button>
         <button className="btn-ghost !py-2.5 text-sm" onClick={() => fileRef.current?.click()} disabled={busy}>

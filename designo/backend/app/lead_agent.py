@@ -65,6 +65,7 @@ def _run_pipeline(lead_id: str) -> None:
         else:
             leads_db.update_lead(lead_id, status="researching",
                                  status_detail="Fable is studying the business")
+            lead = _ensure_site_content(lead)
             brief = _write_brief(lead)
             project = db.create_project(brief.get("business_name") or lead["business_name"], brief)
             project_id = project["id"]
@@ -104,6 +105,31 @@ def _run_pipeline(lead_id: str) -> None:
         leads_db.update_lead(lead_id, status="error", status_detail=str(exc))
     finally:
         _release(lead_id)
+
+
+def _ensure_site_content(lead: dict) -> dict:
+    """If the lead has an existing website, scrape its real content so the
+    brief keeps their true services/story instead of inferring them."""
+    website = (lead.get("website") or "").strip()
+    raw = lead.get("raw") or {}
+    if not website or raw.get("site_content"):
+        return lead
+    from . import site_scraper
+
+    leads_db.update_lead(lead["id"],
+                         status_detail="Reading their current website")
+    content = site_scraper.scrape(website)
+    if content:
+        raw["site_content"] = content
+        lead = leads_db.update_lead(lead["id"], raw=raw)
+        leads_db.add_event(lead["id"], "site_content_scraped", {
+            "pages": len(content["pages"]), "chars": content["total_chars"]})
+        log.info("lead %s: scraped %d pages (%d chars) from %s",
+                 lead["id"], len(content["pages"]),
+                 content["total_chars"], website)
+    else:
+        log.info("lead %s: existing site %s not scrapeable", lead["id"], website)
+    return lead
 
 
 def _write_brief(lead: dict) -> dict:

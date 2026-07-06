@@ -49,3 +49,15 @@ Confirmed pricing is **£695/£59**; old £495/£39 defaults lingered in the set
 ## Anthropic credit exhaustion
 
 Generation fails hard when the API key runs out of credits — not a code issue; top up and re-run.
+
+## Bot walls blocked visual audits (2026-07-06)
+
+The creative-director screenshots ([[Website Audit Methodology]]) initially failed on ~1/3 of sites: SiteGround's `sgcaptcha` and Cloudflare "checking your browser" interstitials were what got screenshotted, so Fable either guessed from the challenge page or returned `unknown`. Fixes in `visual_audit.py`: playwright-stealth 2.x patches on the context, poll up to 40s until challenge URL/body markers clear (they resolve themselves via JS), auto-click cookie-consent "Accept" so modals don't cover the design, `networkidle` wait, and one retry with a 12s settle when the model still says `unknown`. Same challenge-polling added to `site_scraper._fetch_rendered`. Also added a `dead` verdict — "site not found"/parking pages used to be judged as designs; now they import as top-priority abandoned-site leads.
+
+## Environment reset lost all uncommitted work (2026-07-06)
+
+The VM reverted mid-session: every uncommitted file under `/opt/app` vanished (all designo backend/frontend sources, the nginx `portal` site config, `.env`, vault notes, progress entries). Restored from git + `deploy/nginx/portal.conf` + the chat transcript; `.env` recreated by hand; SQLite DBs in `designo/storage/` survived. **Commit and push at the end of every session.**
+
+## `pkill -f` self-match
+
+`pkill -f retry_visual.py` killed the invoking shell because the pattern matched its own command line. Use `pgrep -f "patter[n]" | xargs -r kill`.

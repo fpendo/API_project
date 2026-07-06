@@ -385,10 +385,23 @@ def build_shadow_prompt(brief: dict, concept: dict | None) -> str:
 
 LEAD_BRIEF_SKILL = """\
 You are the new-business strategist at Designo, a motion-web studio. You are
-given scraped public data about a real local business that has NO website.
-Your job is to write the full Designo questionnaire brief on their behalf, as
-if you had interviewed them — this brief drives an automated website build
-that will be shown to them as a speculative pitch.
+given scraped public data about a real local business. Your job is to write
+the full Designo questionnaire brief on their behalf, as if you had
+interviewed them — this brief drives an automated website build that will be
+shown to them as a speculative pitch.
+
+There are two kinds of prospect:
+
+1. NO WEBSITE: only their Google listing data is available. Infer
+   industry-typical truths where data is thin.
+2. HAS A DATED WEBSITE: the input includes EXISTING WEBSITE CONTENT — real
+   text scraped from their current site. This is GROUND TRUTH. Use their
+   actual services, service areas, about-us story, team names, opening hours,
+   accreditations and real testimonials. The new site must feel like THEIR
+   business upgraded, not a generic business in their category. Real
+   testimonials from their site may be used verbatim (they published them);
+   still never invent new ones. Where their copy is dated or clumsy, keep the
+   facts and improve the writing.
 
 Respond with ONLY a valid JSON object (no markdown fences) with EXACTLY:
 
@@ -425,6 +438,8 @@ Rules:
 def build_lead_brief_prompt(lead: dict) -> str:
     import json
 
+    raw = dict(lead.get("raw") or {})
+    site_content = raw.pop("site_content", None)
     data = {
         "business_name": lead["business_name"],
         "category": lead["category"],
@@ -437,23 +452,41 @@ def build_lead_brief_prompt(lead: dict) -> str:
         "socials": lead["socials"],
         "rating": lead["rating"],
         "reviews_count": lead["reviews_count"],
-        "extra_scraped_data": lead["raw"],
+        "extra_scraped_data": raw,
     }
+    site_section = ""
+    if site_content:
+        pages = "\n\n".join(
+            f"### PAGE: {p.get('title') or p['url']}\n{p['text']}"
+            for p in site_content.get("pages", []))
+        site_section = (
+            "## EXISTING WEBSITE CONTENT (ground truth — scraped from "
+            f"{site_content.get('scraped_from', 'their current site')})\n"
+            f"{pages}\n\n")
     return (
         "Write the Designo questionnaire brief for this business now.\n\n"
         "## SCRAPED PUBLIC DATA\n"
         f"{json.dumps(data, indent=2)}\n\n"
+        + site_section +
         "Respond with ONLY the JSON object."
     )
 
 
 PITCH_EMAIL_SKILL = """\
 You write first-contact emails for Designo, a studio that builds websites for
-local businesses. The recipient is a real business owner with no website. We
-have ALREADY BUILT them a complete website mockup, and the email includes (we
-add these parts — do not write them): an inline animated preview of their
-actual site, their private login details, and a "See your website live"
-button.
+local businesses. The recipient is a real business owner. We have ALREADY
+BUILT them a complete website mockup, and the email includes (we add these
+parts — do not write them): an inline animated preview of their actual site,
+their private login details, and a "See your website live" button.
+
+There are two kinds of prospect — the input will tell you which:
+
+1. NO WEBSITE: they have no website at all. We noticed and went ahead and
+   designed one for them.
+2. DATED WEBSITE: they have a website, but our audit found concrete problems
+   (the findings are in the input, and a findings box is shown in the email —
+   do not repeat the list verbatim). We reviewed their current site and built
+   them a modern replacement.
 
 Your job is the words around that. Respond with ONLY a valid JSON object:
 
@@ -464,13 +497,20 @@ Your job is the words around that. Respond with ONLY a valid JSON object:
 
 Rules for the subject:
 - Feels personal and specific, never salesy. Good: "Built you a website,
-  {business name}" / "A website for {business name} — already made".
+  {business name}" / "A website for {business name} — already made" / for
+  dated sites: "Had a look at {business name}'s website — built you a new one".
   Bad: anything with 'offer', 'deal', 'free', '!', ALL CAPS, or emoji.
 
 Rules for the paragraphs:
-- First paragraph: who we are in half a sentence, then straight to the point —
-  we noticed they don't have a website, so we went ahead and designed one for
-  them; it's below.
+- First paragraph: who we are in half a sentence, then straight to the point.
+  No website: we noticed they don't have a website, so we designed one; it's
+  below. Dated website: we came across their site, gave it an honest once-over
+  (mention the one or two most damaging findings conversationally — e.g. "it
+  doesn't adapt to phones" or "browsers now flag it as not secure"), and
+  rather than send a report, we went ahead and rebuilt it; the preview is
+  below.
+- For dated sites: respectful, never mocking — the tone is "your work deserves
+  better than your website", not "your website is embarrassing".
 - Reference ONE specific true detail about their business (their trade, their
   town, their strong reviews) so it's obviously not a blast.
 - Do NOT hard-sell and do NOT state prices — pricing is shown inside the site
@@ -479,15 +519,42 @@ Rules for the paragraphs:
 - No pressure tactics, no fake deadlines, no "limited time".
 - British English, warm and plain-spoken. Sound like a small studio, not a
   marketing platform. 90-130 words total across all paragraphs.
-- Never fabricate facts about their business.
+- Never fabricate facts about their business or their website — only use the
+  audit findings supplied.
 """
 
 
 def build_pitch_email_prompt(lead: dict, brief: dict) -> str:
     import json
 
+    audit = (lead.get("raw") or {}).get("site_audit")
+    dead = audit and (not audit.get("reachable", True)
+                      or (audit.get("visual") or {}).get("verdict") == "dead")
+    if dead:
+        prospect_kind = (
+            "## PROSPECT KIND: DATED WEBSITE\n"
+            f"Their current website ({lead.get('website')}) is UNREACHABLE — it "
+            "appears dead or abandoned. Mention gently that their site seems to "
+            "be down when people look for them.\n\n"
+        )
+    elif audit:
+        findings = list(audit.get("signals") or [])
+        visual = audit.get("visual") or {}
+        if visual.get("reasons"):
+            findings = visual["reasons"] + findings
+        prospect_kind = (
+            "## PROSPECT KIND: DATED WEBSITE\n"
+            f"Their current website: {lead.get('website')}\n"
+            "Our audit found these problems (pick the one or two most damaging "
+            "to mention conversationally):\n"
+            f"{json.dumps(findings, indent=2)}\n\n"
+        )
+    else:
+        prospect_kind = "## PROSPECT KIND: NO WEBSITE\n\n"
+
     return (
         "Write the pitch email for this prospect now.\n\n"
+        + prospect_kind +
         "## THE BUSINESS (scraped data)\n"
         f"{json.dumps({k: lead[k] for k in ('business_name', 'category', 'town', 'rating', 'reviews_count')}, indent=2)}\n\n"
         "## THE BRIEF WE BUILT THEIR SITE FROM\n"

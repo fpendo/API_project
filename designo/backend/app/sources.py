@@ -15,6 +15,7 @@ recorded but marked 'skipped' so spend isn't wasted mocking them up.
 import csv
 import io
 import logging
+import re
 import threading
 import time
 import uuid
@@ -71,6 +72,9 @@ def _store_lead(job_id: str, source: str, record: dict) -> None:
         _job_update(job_id, skipped=_jobs[job_id]["skipped"] + 1)
         return
     has_site = bool((record.get("website") or "").strip())
+    status = record.get("status") or ("skipped" if has_site else "new")
+    status_detail = record.get("status_detail") or (
+        "already has a website" if has_site else None)
     lead = leads_db.create_lead(
         source=source,
         business_name=name,
@@ -86,8 +90,8 @@ def _store_lead(job_id: str, source: str, record: dict) -> None:
         raw=record.get("raw") or {},
         rating=record.get("rating"),
         reviews_count=record.get("reviews_count"),
-        status="skipped" if has_site else "new",
-        status_detail="already has a website" if has_site else None,
+        status=status,
+        status_detail=status_detail,
     )
     leads_db.add_event(lead["id"], "discovered", {"source": source})
     _job_update(job_id, imported=_jobs[job_id]["imported"] + 1)
@@ -104,23 +108,182 @@ def apify_enabled() -> bool:
     return bool(config.APIFY_TOKEN)
 
 
-def start_apify_discovery(query: str, max_places: int = 40) -> dict:
-    """query e.g. 'plumbers in Shrewsbury'."""
+def start_apify_discovery(query: str, max_places: int = 40,
+                          mode: str = "no_website") -> dict:
+    """query e.g. 'plumbers in Shrewsbury'.
+
+    mode:
+      - "no_website": businesses with no website at all (default)
+      - "old_website": businesses whose website looks dated — each candidate
+        site is audited (technical heuristics + creative-director visual
+        review); only sites judged dated are imported as leads.
+    """
     if not apify_enabled():
         raise RuntimeError("APIFY_TOKEN is not configured")
-    return _start_job("apify", query, _run_apify, query, max_places)
+    label = query if mode == "no_website" else f"{query} (dated websites)"
+    return _start_job("apify", label, _run_apify, query, max_places, mode)
 
 
-def _run_apify(job_id: str, query: str, max_places: int) -> None:
+# --- Region sweep ------------------------------------------------------------
+#
+# Curated town list for the South West sweep. Deliberately market towns and
+# cities where service businesses cluster; category x town becomes one Apify
+# search string each.
+
+SOUTH_WEST_TOWNS = [
+    # Cornwall
+    "Truro", "Falmouth", "Penzance", "St Austell", "Newquay", "Bodmin",
+    # Devon
+    "Exeter", "Plymouth", "Torquay", "Barnstaple", "Exmouth", "Newton Abbot",
+    # Somerset
+    "Taunton", "Yeovil", "Bridgwater", "Weston-super-Mare", "Frome",
+    # Dorset
+    "Bournemouth", "Poole", "Dorchester", "Weymouth",
+    # Bristol / Bath / Wiltshire / Gloucestershire
+    "Bristol", "Bath", "Swindon", "Salisbury", "Gloucester", "Cheltenham",
+]
+
+# Google Maps categories that indicate product/retail businesses — excluded
+# when a sweep asks for services only (product sites need e-commerce, which
+# we don't want to take on).
+_PRODUCT_CATEGORY_WORDS = (
+    "shop", "store", "retail", "supermarket", "boutique", "dealer",
+    "dealership", "showroom", "wholesaler", "supplier", "market",
+    "bakery", "butcher", "florist", "garden centre", "furniture",
+)
+
+
+def _looks_like_product_business(item: dict) -> str | None:
+    """Return the offending category if this looks like a product seller."""
+    cats = [item.get("categoryName") or ""] + list(item.get("categories") or [])
+    for cat in cats:
+        c = cat.lower()
+        if any(w in c for w in _PRODUCT_CATEGORY_WORDS):
+            return cat
+    return None
+
+
+def start_region_sweep(categories: list[str], max_per_search: int = 10,
+                       towns: list[str] | None = None) -> dict:
+    """Sweep service categories across South West towns, auditing each
+    business website for modernisation ammo. Services only — product
+    businesses are filtered out by category and by e-commerce signals."""
+    if not apify_enabled():
+        raise RuntimeError("APIFY_TOKEN is not configured")
+    towns = towns or SOUTH_WEST_TOWNS
+    queries = [f"{cat.strip()} in {town}" for cat in categories if cat.strip()
+               for town in towns]
+    if not queries:
+        raise RuntimeError("at least one category is required")
+    if len(queries) > 60:
+        raise RuntimeError(
+            f"{len(queries)} searches is too many for one sweep — "
+            "use fewer categories (limit 60 searches)")
+    label = f"SW sweep: {', '.join(categories)} ({len(queries)} searches)"
+    return _start_job("apify", label, _run_apify, queries, max_per_search,
+                      "old_website", True)
+
+
+# --- "Old generation" website heuristics -----------------------------------
+#
+# Technical pre-filter only: a site can fail every technical check and still
+# look fine to a customer (TWR Lighting), or pass a few and look like 2005
+# (SBR Electrical). The qualifying judgement is the creative-director visual
+# review in visual_audit.py; these heuristics decide who is worth the cost of
+# that review, and their findings remain true pitch ammunition.
+
+_DATED_THRESHOLD = 4
+
+def _audit_website(url: str) -> dict | None:
+    """Fetch a site and score how dated it looks. None if unreachable."""
+    if not url.startswith(("http://", "https://")):
+        url = "http://" + url
+    try:
+        with httpx.Client(timeout=12, follow_redirects=True,
+                          headers={"User-Agent": "Mozilla/5.0 (compatible; DesignoAudit/1.0)"},
+                          verify=False) as client:
+            resp = client.get(url)
+            final_url = str(resp.url)
+            html = resp.text[:400_000]
+    except Exception as exc:
+        return {"reachable": False, "error": str(exc)[:200], "score": 0, "signals": []}
+
+    low = html.lower()
+
+    # A bot-challenge page (SiteGround sgcaptcha, Cloudflare…) is not the real
+    # site — scoring it produces garbage signals (no viewport, no schema…).
+    # Flag it so the caller relies on the visual review, which can wait the
+    # challenge out in a real browser.
+    if any(m in low[:6_000] for m in (
+            "sgcaptcha", "checking the site connection security",
+            "checking your browser", "just a moment",
+            "verify you are human", "cf-browser-verification")):
+        return {"reachable": True, "score": 0, "signals": [],
+                "final_url": final_url, "ecommerce": False,
+                "challenge": True}
+
+    score = 0
+    signals: list[str] = []
+
+    def hit(points: int, label: str) -> None:
+        nonlocal score
+        score += points
+        signals.append(label)
+
+    if "<meta" not in low or "viewport" not in low:
+        hit(4, "no mobile viewport (pre-responsive era)")
+    if final_url.startswith("http://"):
+        hit(3, "no HTTPS")
+    for tag, label in (("<frameset", "framesets"), ("<marquee", "<marquee> tag"),
+                       ("<font ", "<font> tags"), ("<center>", "<center> tags")):
+        if tag in low:
+            hit(3, label)
+            break
+    if ".swf" in low or "shockwave-flash" in low:
+        hit(3, "Flash content")
+    m = re.search(r'name=["\']generator["\'][^>]*content=["\']([^"\']+)', low)
+    if m and any(g in m.group(1) for g in ("frontpage", "dreamweaver", "microsoft word",
+                                           "godaddy", "homestead", "yola", "webplus")):
+        hit(3, f"built with {m.group(1).strip()[:40]}")
+    years = [int(y) for y in re.findall(
+        r"(?:&copy;|©|copyright)\D{0,30}?(20[0-2]\d|19\d\d)", low)]
+    if years:
+        stale = date.today().year - max(years)
+        if stale >= 8:
+            hit(4, f"copyright stuck at {max(years)}")
+        elif stale >= 5:
+            hit(3, f"copyright stuck at {max(years)}")
+        elif stale >= 3:
+            hit(2, f"copyright stuck at {max(years)}")
+    if re.search(r"jquery[.-]1\.\d", low):
+        hit(2, "jQuery 1.x (2006-2016)")
+    if "bgcolor=" in low or "cellpadding=" in low:
+        hit(2, "table-era markup (bgcolor/cellpadding)")
+    if "application/ld+json" not in low and "schema.org" not in low:
+        hit(1, "no structured data")
+
+    ecommerce = any(marker in low for marker in (
+        "add to cart", "add to basket", "woocommerce", "shopify",
+        "add-to-cart", "cdn.shopify.com", "bigcommerce", "opencart"))
+
+    return {"reachable": True, "score": score, "signals": signals,
+            "final_url": final_url, "ecommerce": ecommerce}
+
+
+def _run_apify(job_id: str, query: str | list[str], max_places: int,
+               mode: str = "no_website", services_only: bool = False) -> None:
     try:
         actor = config.APIFY_GMAPS_ACTOR
+        queries = [query] if isinstance(query, str) else query
         run_input = {
-            "searchStringsArray": [query],
+            "searchStringsArray": queries,
             "maxCrawledPlacesPerSearch": max_places,
             "language": "en",
+            "countryCode": "gb",             # UK businesses only
             "scrapeContacts": True,          # enrich emails/socials from linked pages
             "skipClosedPlaces": True,
-            "website": "withoutWebsite",     # only businesses with no website
+            "website": ("withWebsite" if mode == "old_website"
+                        else "withoutWebsite"),
         }
         with httpx.Client(timeout=60) as client:
             resp = client.post(
@@ -132,8 +295,8 @@ def _run_apify(job_id: str, query: str, max_places: int) -> None:
             run = resp.json()["data"]
             run_id = run["id"]
 
-            # Poll (scrapes typically take 1-5 minutes)
-            deadline = time.time() + 15 * 60
+            # Poll (single searches take 1-5 min; sweeps scale with searches)
+            deadline = time.time() + min(60, 15 + len(queries)) * 60
             status = run["status"]
             while status in ("READY", "RUNNING") and time.time() < deadline:
                 time.sleep(10)
@@ -160,7 +323,66 @@ def _run_apify(job_id: str, query: str, max_places: int) -> None:
                 ("facebooks", "instagrams", "linkedIns", "twitters")
                 if item.get(k)
             }
+            if services_only:
+                product_cat = _looks_like_product_business(item)
+                if product_cat:
+                    log.info("sweep: skipping product business %r (%s)",
+                             item.get("title"), product_cat)
+                    continue
+            status = status_detail = None
+            audit = None
+            if mode == "old_website":
+                website = (item.get("website") or "").strip()
+                if not website:
+                    continue
+                audit = _audit_website(website)
+                if services_only and audit.get("ecommerce"):
+                    log.info("sweep: skipping e-commerce site %r",
+                             item.get("title"))
+                    continue
+                if not audit.get("reachable"):
+                    # A dead site is the best modernisation lead of all
+                    status, status_detail = "new", "website unreachable — likely abandoned"
+                elif audit["score"] >= _DATED_THRESHOLD or audit.get("challenge"):
+                    # Challenge-walled sites can't be scored from HTML — let
+                    # the visual review (real browser, waits the wall out)
+                    # make the call.
+                    # Technical age is only the pre-filter; the qualifying
+                    # judgement is visual.
+                    from . import visual_audit
+                    visual = visual_audit.review(website)
+                    if visual:
+                        audit["visual"] = visual
+                        audit["bread_and_butter"] = visual["verdict"] in ("rebuild", "dead")
+                        if visual["verdict"] == "modern":
+                            log.info("sweep: %r technically dated but looks "
+                                     "modern (design %s/10) — skipping",
+                                     item.get("title"), visual["design_score"])
+                            continue
+                        status = "new"
+                        if visual["verdict"] == "dead":
+                            status_detail = "website dead/parked — likely abandoned"
+                        else:
+                            tier = ("REBUILD" if visual["verdict"] == "rebuild"
+                                    else "borderline")
+                            first_reason = (visual["reasons"][0]
+                                            if visual.get("reasons") else "")
+                            status_detail = (
+                                f"{tier} — design {visual['design_score']}/10, "
+                                f"reads as {visual['era']}. {first_reason}")
+                    elif audit.get("challenge"):
+                        continue  # couldn't see past the bot wall — not a lead
+                    else:
+                        # Screenshot/vision unavailable — fall back to the
+                        # technical score alone.
+                        status = "new"
+                        status_detail = ("dated website (score {}): {}".format(
+                            audit["score"], "; ".join(audit["signals"][:4])))
+                else:
+                    continue  # technically modern enough — not a lead
             _store_lead(job_id, "apify", {
+                "status": status,
+                "status_detail": status_detail,
                 "business_name": item.get("title"),
                 "category": item.get("categoryName") or "",
                 "description": item.get("description") or "",
@@ -173,10 +395,13 @@ def _run_apify(job_id: str, query: str, max_places: int) -> None:
                 "socials": socials,
                 "rating": item.get("totalScore"),
                 "reviews_count": item.get("reviewsCount"),
-                "raw": {k: v for k, v in item.items()
-                        if k in ("title", "categoryName", "categories", "description",
-                                 "address", "phone", "totalScore", "reviewsCount",
-                                 "openingHours", "reviewsTags", "url")},
+                "raw": {
+                    **{k: v for k, v in item.items()
+                       if k in ("title", "categoryName", "categories", "description",
+                                "address", "phone", "totalScore", "reviewsCount",
+                                "openingHours", "reviewsTags", "url")},
+                    **({"site_audit": audit} if audit else {}),
+                },
             })
         _job_update(job_id, status="done")
     except Exception as exc:

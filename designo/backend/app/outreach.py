@@ -44,6 +44,44 @@ def unsubscribe_url(email: str) -> str:
 # Rendering
 # ---------------------------------------------------------------------------
 
+# Plain-English translations of the technical audit signals, for the
+# "what we found" box in dated-website pitch emails.
+_FINDING_TRANSLATIONS = [
+    ("no mobile viewport", "It doesn't adapt to phones — over half of local "
+     "searches happen on a mobile, and visitors have to pinch and zoom"),
+    ("no HTTPS", "Browsers mark it \u201cNot secure\u201d in the address bar "
+     "— the padlock every modern site has is missing"),
+    ("copyright stuck at", None),  # handled specially to keep the year
+    ("Flash content", "It uses Flash, which no modern browser can display "
+     "any more"),
+    ("jQuery 1.x", "It runs on technology from around 2010 that browsers "
+     "are steadily dropping support for"),
+    ("framesets", "It's built with 1990s-era page framing that search "
+     "engines struggle to read"),
+    ("<marquee>", "It uses scrolling-text effects from the dial-up era"),
+    ("<font> tags", "The styling is done with code retired over a decade ago"),
+    ("<center> tags", "The styling is done with code retired over a decade ago"),
+    ("table-era markup", "The page layout uses pre-2010 techniques that "
+     "break on modern screens"),
+    ("built with", "It was made with a website builder that was "
+     "discontinued years ago"),
+    ("no structured data", "It's invisible to the AI assistants (ChatGPT, "
+     "Google's AI) that more and more customers use to find local businesses"),
+]
+
+
+def _friendly_finding(signal: str) -> str:
+    low = signal.lower()
+    if "copyright stuck at" in low:
+        year = signal.rsplit(" ", 1)[-1]
+        return (f"The site says \u00a9{year} — to anyone checking whether "
+                "you're still trading, it looks abandoned")
+    for needle, friendly in _FINDING_TRANSLATIONS:
+        if friendly and needle.lower() in low:
+            return friendly
+    return signal
+
+
 def render_email(lead_id: str, paragraphs: list[str]) -> str:
     """Full table-based HTML email around Fable's paragraphs."""
     lead = leads_db.get_lead(lead_id)
@@ -59,6 +97,36 @@ def render_email(lead_id: str, paragraphs: list[str]) -> str:
         f'<p style="margin:0 0 14px 0;font-size:15px;line-height:1.65;color:#2a2a2e;">{esc(p)}</p>'
         for p in paragraphs
     )
+    audit = (lead.get("raw") or {}).get("site_audit")
+    audit_html = ""
+    if audit:
+        visual = audit.get("visual") or {}
+        if not audit.get("reachable", True) or visual.get("verdict") == "dead":
+            findings = ["Your website isn't loading at all right now — anyone "
+                        "who looks for you online finds a dead end."]
+        else:
+            # Visual (creative director) observations lead; technical
+            # findings translated to plain English fill the rest.
+            findings = list(visual.get("reasons") or [])[:3]
+            findings += [_friendly_finding(s)
+                         for s in list(audit.get("signals") or [])]
+            findings = findings[:5]
+        if findings:
+            items = "".join(
+                f'<li style="margin:0 0 7px 0;font-size:14px;line-height:1.55;color:#2a2a2e;">{esc(f)}</li>'
+                for f in findings)
+            audit_html = f"""
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="background:#fbf7ee;border:1px solid #ecdfc3;border-radius:10px;margin:18px 0;">
+          <tr><td style="padding:16px 20px;">
+            <p style="margin:0 0 10px 0;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#a08a5a;">
+              What we found on your current site</p>
+            <ul style="margin:0;padding:0 0 0 18px;">{items}</ul>
+            <p style="margin:10px 0 0 0;font-size:13px;line-height:1.55;color:#8a887f;">
+              None of this is unusual — websites age quickly. The new design below fixes all of it.</p>
+          </td></tr>
+        </table>"""
+
     creds_html = ""
     if access:
         creds_html = f"""
@@ -74,6 +142,10 @@ def render_email(lead_id: str, paragraphs: list[str]) -> str:
         </table>"""
 
     first_name = esc(lead["business_name"])
+    footer_reason = (
+        f"{first_name}'s website appears on public business listings and showed "
+        "signs of needing an update" if audit else
+        f"{first_name} appears on public business listings without a website")
     return f"""<!DOCTYPE html>
 <html lang="en">
 <body style="margin:0;padding:0;background:#efeeea;">
@@ -85,6 +157,7 @@ def render_email(lead_id: str, paragraphs: list[str]) -> str:
         <tr><td style="padding:30px 34px 8px 34px;font-family:Georgia,'Times New Roman',serif;">
           <p style="margin:0 0 20px 0;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#8a887f;">{esc(sender)}</p>
           {paras_html}
+          {audit_html}
         </td></tr>
         <tr><td style="padding:8px 34px 0 34px;">
           <a href="{site_url}" style="text-decoration:none;">
@@ -109,7 +182,7 @@ def render_email(lead_id: str, paragraphs: list[str]) -> str:
       <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
         <tr><td align="center" style="padding:16px 20px;font-family:Georgia,serif;">
           <p style="margin:0;font-size:12px;line-height:1.6;color:#9a988f;">
-            You're receiving this one-off note because {first_name} appears on public business listings without a website.
+            You're receiving this one-off note because {footer_reason}.
             No interest? <a href="{unsubscribe_url(lead['email'])}" style="color:#9a988f;">Unsubscribe</a> and we won't write again.
           </p>
         </td></tr>

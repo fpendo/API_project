@@ -93,7 +93,9 @@ export const api = {
   sendWelcome: (id: string) => request<Lead>(`/leads/${id}/send-welcome`, json('POST')),
   welcomePreviewUrl: (id: string) => `${API_BASE}/leads/${id}/welcome-preview`,
 
-  discover: (body: { source: string; query?: string; sic_code?: string; days_back?: number; max_results?: number }) =>
+  sweep: (body: { categories: string[]; max_per_search?: number }) =>
+    request<DiscoveryJob>('/leads/sweep', json('POST', body)),
+  discover: (body: { source: string; query?: string; mode?: string; sic_code?: string; days_back?: number; max_results?: number }) =>
     request<DiscoveryJob>('/leads/discover', json('POST', body)),
   discoveryStatus: (jobId: string) => request<DiscoveryJob>(`/leads/discovery/${jobId}`),
   importLeadsCsv: (file: File) => {

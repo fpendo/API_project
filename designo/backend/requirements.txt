@@ -17,8 +17,12 @@ httpx>=0.27
 Pillow>=10.0
 
 # Lead-gen: headless Chromium for email preview media (hero screenshot + scroll GIF)
-# After install run: playwright install chromium --with-deps
+# and visual site audits. After install run: playwright install chromium --with-deps
 playwright>=1.60
+playwright-stealth>=2.0   # bot-check evasion for audit screenshots/scraping
+
+# Lead-gen: scraping a prospect's existing website for brief ground truth
+beautifulsoup4>=4.12
 
 # Stripe: payment links for one-off build fee and monthly BACS subscription
 stripe>=8.0

@@ -74,9 +74,15 @@ class HeroVideoRequest(BaseModel):
 class DiscoverRequest(BaseModel):
     source: str  # apify | companies_house
     query: str = ""            # apify: "plumbers in Shrewsbury"
+    mode: str = "no_website"   # apify: no_website | old_website (dated sites)
     sic_code: str = ""         # companies house
     days_back: int = 30
     max_results: int = 40
+
+
+class SweepRequest(BaseModel):
+    categories: list[str]      # e.g. ["plumbers", "physiotherapists"]
+    max_per_search: int = 10   # places per category+town search
 
 
 class LeadUpdate(BaseModel):
@@ -434,11 +440,36 @@ def video_file(project_id: str, video_id: str):
 
 # --- Lead generation ---
 
+def _opportunity_score(lead: dict) -> int | None:
+    """Composite 0-100 'how big is the opportunity' score for audited leads.
+
+    Visual age dominates (it's the buying signal); technical failings top it
+    up; a dead site is the biggest opportunity of all. None when the lead has
+    no audited website.
+    """
+    audit = (lead.get("raw") or {}).get("site_audit")
+    if not audit:
+        return None
+    if not audit.get("reachable", True):
+        return 100
+    visual = audit.get("visual") or {}
+    if visual.get("verdict") == "dead":
+        return 100  # site loads but shows a not-published/parking page
+    technical = min(int(audit.get("score") or 0), 20)  # 0-20
+    if visual.get("design_score"):
+        # design 1 -> 72, design 5 -> 40, design 8 -> 16 (before technical)
+        visual_component = round((10 - float(visual["design_score"])) * 8)
+    else:
+        visual_component = 20  # technical-only audits sit mid-table
+    return max(0, min(100, visual_component + technical))
+
+
 def _lead_payload(lead: dict, full: bool = False) -> dict:
     payload = {
         **lead,
         "access": leads_db.get_prospect_access(lead["id"]),
         "outreach_email": leads_db.latest_email_for_lead(lead["id"]),
+        "opportunity_score": _opportunity_score(lead),
         "has_site": bool(lead.get("project_id"))
         and storage.read_site_html(lead["project_id"]) is not None,
     }
@@ -472,13 +503,28 @@ def discover_leads(body: DiscoverRequest):
         if body.source == "apify":
             if not body.query.strip():
                 raise HTTPException(400, "query is required (e.g. 'plumbers in Shrewsbury')")
-            return sources.start_apify_discovery(body.query.strip(), body.max_results)
+            if body.mode not in ("no_website", "old_website"):
+                raise HTTPException(400, "mode must be 'no_website' or 'old_website'")
+            return sources.start_apify_discovery(
+                body.query.strip(), body.max_results, body.mode)
         if body.source == "companies_house":
             if not body.sic_code.strip():
                 raise HTTPException(400, "sic_code is required (e.g. 43220 for plumbers)")
             return sources.start_companies_house_discovery(
                 body.sic_code.strip(), body.days_back, body.max_results)
         raise HTTPException(400, "source must be 'apify' or 'companies_house'")
+    except RuntimeError as exc:
+        raise HTTPException(400, str(exc))
+
+
+@app.post("/api/leads/sweep")
+def sweep_leads(body: SweepRequest):
+    """South West sweep: dated-website audit across the region, services only."""
+    try:
+        return sources.start_region_sweep(
+            [c for c in body.categories if c.strip()],
+            max_per_search=max(1, min(body.max_per_search, 25)),
+        )
     except RuntimeError as exc:
         raise HTTPException(400, str(exc))
 

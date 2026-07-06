@@ -2,11 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import Shell from '../components/Shell'
 import { api } from '../api'
-import { AppConfig, Lead, LeadEvent, LEAD_TRANSIENT } from '../types'
+import { AppConfig, Lead, LeadEvent, LEAD_TRANSIENT, SiteAudit, SiteContent } from '../types'
 import { LeadBadge } from './Leads'
 
 const EVENT_LABELS: Record<string, string> = {
   discovered: 'Lead discovered',
+  site_content_scraped: 'Current website content scraped',
   brief_written: 'Brief written by Fable',
   mockup_ready: 'Mockup website built',
   preview_media_failed: 'Preview media capture failed',
@@ -260,6 +261,65 @@ export default function LeadDetail() {
             </div>
           )}
 
+          {(() => {
+            const audit = lead.raw?.site_audit as SiteAudit | undefined
+            if (!audit || lead.opportunity_score == null) return null
+            const visual = audit.visual
+            const unreachable = audit.reachable === false
+            return (
+              <div className="glass-card p-6">
+                <div className="flex items-center justify-between gap-4 mb-3">
+                  <h2 className="font-display font-semibold text-lg">Opportunity rating</h2>
+                  <div className={`shrink-0 w-16 h-16 rounded-xl border flex flex-col items-center justify-center ${
+                    lead.opportunity_score >= 60 ? 'border-red-500/50 bg-red-500/10 text-red-300'
+                    : lead.opportunity_score >= 40 ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+                    : 'border-slate-500/40 bg-slate-500/10 text-slate-300'}`}>
+                    <span className="font-display font-bold text-2xl leading-none">{lead.opportunity_score}</span>
+                    <span className="text-[9px] font-mono uppercase tracking-wider mt-1 opacity-70">/ 100</span>
+                  </div>
+                </div>
+                <dl className="space-y-2 text-sm mb-3">
+                  <div className="flex gap-3">
+                    <dt className="text-text-muted w-24 shrink-0">Visual</dt>
+                    <dd className="text-text-secondary">
+                      {unreachable ? 'site unreachable — likely abandoned'
+                        : visual?.verdict === 'dead' ? 'site dead/parked — likely abandoned'
+                        : visual ? `design ${visual.design_score}/10 — ${visual.verdict}, reads as ${visual.era}`
+                        : 'not visually reviewed yet'}
+                    </dd>
+                  </div>
+                  <div className="flex gap-3">
+                    <dt className="text-text-muted w-24 shrink-0">Technical</dt>
+                    <dd className="text-text-secondary">
+                      {unreachable ? '—' : `score ${audit.score ?? 0} (${(audit.signals ?? []).length} findings)`}
+                    </dd>
+                  </div>
+                </dl>
+                {visual && visual.reasons.length > 0 && (
+                  <ul className="space-y-1 border-t border-border pt-3">
+                    {visual.reasons.map((r) => (
+                      <li key={r} className="text-sm text-text-secondary flex gap-2">
+                        <span className="text-text-muted shrink-0">–</span>{r}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {(audit.signals?.length ?? 0) > 0 && (
+                  <ul className={`space-y-1 ${visual?.reasons.length ? 'mt-1' : 'border-t border-border pt-3'}`}>
+                    {audit.signals!.map((s) => (
+                      <li key={s} className="text-sm text-text-muted flex gap-2">
+                        <span className="text-amber-400 shrink-0">▸</span>{s}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {visual?.pitch_line && (
+                  <p className="text-sm text-text-muted italic mt-3">"{visual.pitch_line}"</p>
+                )}
+              </div>
+            )
+          })()}
+
           <div className="glass-card p-6">
             <h2 className="font-display font-semibold text-lg mb-3">Business</h2>
             <dl className="space-y-2 text-sm">
@@ -272,6 +332,18 @@ export default function LeadDetail() {
                     <dd className="text-text-secondary min-w-0">{v}</dd>
                   </div>
                 ) : null)}
+              {lead.website && (
+                <div className="flex gap-3">
+                  <dt className="text-text-muted w-24 shrink-0">Website</dt>
+                  <dd className="min-w-0 truncate">
+                    <a href={lead.website.startsWith('http') ? lead.website : `http://${lead.website}`}
+                      target="_blank" rel="noreferrer"
+                      className="text-accent-primary hover:text-accent-glow break-all">
+                      {lead.website}
+                    </a>
+                  </dd>
+                </div>
+              )}
             </dl>
             <div className="mt-4">
               <label className="block text-xs font-medium text-text-secondary mb-1.5">Prospect email address</label>
@@ -290,6 +362,41 @@ export default function LeadDetail() {
               )}
             </div>
           </div>
+
+          {(() => {
+            const content = lead.raw?.site_content as SiteContent | undefined
+            if (!content?.pages?.length) return null
+            return (
+              <div className="glass-card p-6">
+                <h2 className="font-display font-semibold text-lg mb-1">Their current website content</h2>
+                <p className="text-text-muted text-sm mb-3">
+                  {content.pages.length} page{content.pages.length === 1 ? '' : 's'} scraped from{' '}
+                  <a href={content.scraped_from} target="_blank" rel="noreferrer"
+                    className="text-accent-primary hover:text-accent-glow break-all">
+                    {content.scraped_from}
+                  </a>{' '}
+                  — Fable uses this as ground truth when writing the brief.
+                </p>
+                {content.meta_description && (
+                  <p className="text-sm text-text-secondary italic mb-3">"{content.meta_description}"</p>
+                )}
+                <div className="space-y-2">
+                  {content.pages.map((p) => (
+                    <details key={p.url} className="border border-border rounded-xl overflow-hidden">
+                      <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium hover:bg-white/5 flex items-center justify-between gap-3">
+                        <span className="truncate">{p.title || p.url}</span>
+                        <span className="text-text-muted text-xs shrink-0">{p.text.length.toLocaleString()} chars</span>
+                      </summary>
+                      <div className="px-4 py-3 border-t border-border max-h-72 overflow-y-auto">
+                        <p className="text-xs text-text-muted font-mono break-all mb-2">{p.url}</p>
+                        <pre className="text-sm text-text-secondary whitespace-pre-wrap font-sans leading-relaxed">{p.text}</pre>
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
 
           {lead.access && prospectUrl && (
             <div className="glass-card p-6">

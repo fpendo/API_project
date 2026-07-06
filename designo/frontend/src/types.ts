@@ -173,10 +173,43 @@ export interface Lead {
   updated_at: number
   access: ProspectAccess | null
   outreach_email: OutreachEmail | null
+  opportunity_score: number | null
   has_site: boolean
   events?: LeadEvent[]
   project?: Project | null
   preview_media?: { hero: boolean; gif: boolean }
+}
+
+export interface VisualAudit {
+  design_score: number
+  era: string
+  verdict: 'rebuild' | 'borderline' | 'modern' | 'dead'
+  reasons: string[]
+  pitch_line: string
+}
+
+export interface SiteAudit {
+  reachable?: boolean
+  score?: number
+  signals?: string[]
+  error?: string
+  final_url?: string
+  ecommerce?: boolean
+  bread_and_butter?: boolean
+  visual?: VisualAudit
+}
+
+export interface SiteContentPage {
+  url: string
+  title: string
+  text: string
+}
+
+export interface SiteContent {
+  scraped_from: string
+  meta_description: string
+  pages: SiteContentPage[]
+  total_chars: number
 }
 
 export interface DiscoveryJob {
