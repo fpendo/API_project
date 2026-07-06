@@ -30,6 +30,7 @@ updated: 2026-07-06
 - [[Pricing & Payments]] — £695 / £59 rationale, Stripe setup, domain strategy
 - [[SEO + ASO Report]] — the weekly report, what ASO is and how it's measured
 - [[Agent Economy Positioning]] — the pitch, AI-vs-search stats, shadow site USP
+- [[Bot Strategy — Good Bots vs Bad]] — verified vs imposter bots, risk tiers, robots.txt policy
 
 ### Operations
 - [[Known Bugs & Fixes]] — resolved issues and how to avoid them
