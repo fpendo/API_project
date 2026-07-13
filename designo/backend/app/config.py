@@ -34,6 +34,8 @@ VIDEO_MODEL_FINAL = os.getenv(
 )
 # Instruction-based photo editing (AI retouch / show-home staging)
 PHOTO_EDIT_MODEL = os.getenv("DESIGNO_PHOTO_EDIT_MODEL", "fal-ai/nano-banana/edit")
+# Text-to-image for creative-director artwork commissions (requires FAL_KEY)
+ARTWORK_MODEL = os.getenv("DESIGNO_ARTWORK_MODEL", "fal-ai/flux-pro/v1.1")
 
 # --- Lead generation ---
 # Apify Google Maps scraper (paid) — finds businesses without websites.
