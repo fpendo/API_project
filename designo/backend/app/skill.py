@@ -148,6 +148,8 @@ choreography are the design contract. Where it is silent, out-design it.
     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js
     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js
   - Lenis smooth scroll: https://unpkg.com/lenis@1.1.14/dist/lenis.min.js
+  - Three.js (for the WebGL layer, when used):
+    https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js
 - Assets are referenced by RELATIVE path exactly as given in the manifests
   (e.g. src="photos/abc.jpg", "videos/hero.mp4"). NEVER invent asset paths,
   never hotlink stock imagery, never use data URIs for photographs (SVG
@@ -173,6 +175,33 @@ choreography are the design contract. Where it is silent, out-design it.
    pinned sequences (e.g. hero pin with scale/parallax exit, horizontal
    gallery, pinned process timeline); staggered reveals on every section;
    multi-layer parallax on imagery.
+
+# WEBGL DEPTH LAYER (the third dimension — what makes juries gasp)
+
+The strongest current award sites feel three-dimensional. Deploy ONE (not
+more) WebGL set piece with Three.js when motion intensity is "balanced" or
+"cinematic" — choose whichever serves the concept best:
+
+- HERO IMAGE DISPLACEMENT: the hero photo on a WebGL plane with a custom
+  shader — scroll-driven depth warp, subtle RGB-shift on mouse move, or a
+  slow liquid displacement loop. The image must still read clearly.
+- DEPTH PARALLAX FIELD: a 3D particle/point field behind or in front of the
+  hero — thousands of points with true z-depth, drifting with scroll and
+  reacting gently to the cursor. Far more dimensional than 2D canvas dots.
+- SHADER BACKDROP: a full-bleed animated gradient/noise shader (fragment
+  shader, palette colours) behind a key section — slow, atmospheric, alive.
+
+Non-negotiable guardrails:
+- ONE WebGL canvas per page maximum; renderer DPR capped at
+  min(devicePixelRatio, 2); pause the render loop when the canvas is
+  off-screen (IntersectionObserver) and on document.hidden.
+- Wrap ALL WebGL init in try/catch with a feature test; on failure or
+  prefers-reduced-motion, fall back silently to the 2D treatment (static
+  image / 2D canvas particles). The page must be flawless without WebGL.
+- Keep shaders compact (< 80 lines each); no external textures beyond the
+  manifest photos; dispose of geometry/textures if the canvas is removed.
+- The WebGL moment must harmonise with the 2D motion system — same palette,
+  same pacing — not feel like a bolted-on tech demo.
 
 # SPECTACLE LAYER (what separates you from template builders)
 

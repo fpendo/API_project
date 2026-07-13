@@ -17,7 +17,7 @@ import time
 
 import anthropic
 
-from . import artwork, config, db, shadow, skill, storage
+from . import artwork, config, critique, db, shadow, skill, storage
 
 log = logging.getLogger("designo.generator")
 
@@ -171,6 +171,50 @@ def _write_shadow_files(project_id: str) -> None:
         log.exception("project %s: writing shadow files failed (continuing)", project_id)
 
 
+def _refine(project_id: str, brief: dict, concept: dict | None,
+            photos: list[dict], videos: list[dict], html: str) -> str:
+    """Critique loop: screenshot -> brutal juror review -> improvement round.
+
+    Runs after the site is written; every intermediate version is also
+    written so a crash mid-loop still leaves a working site. Non-fatal: any
+    critique failure ships the current version.
+    """
+    build_prompt = skill.build_generation_prompt(brief, photos, videos, concept)
+    for round_no in range(1, config.CRITIQUE_ROUNDS + 1):
+        _set_phase(project_id, f"Design critique — round {round_no}")
+        report = critique.review(project_id)
+        if report is None:
+            log.warning("project %s: critique round %d not reviewable — shipping",
+                        project_id, round_no)
+            break
+        score = report["score"]
+        if score >= config.CRITIQUE_TARGET or report.get("verdict") == "ship":
+            log.info("project %s: critique passed at %.1f (round %d)",
+                     project_id, score, round_no)
+            break
+
+        instruction = critique.improvement_instruction(report)
+        if not instruction:
+            break
+        _set_phase(project_id,
+                   f"Improving the design — round {round_no} (scored {score})")
+        log.info("project %s: critique %.1f — improving (round %d)",
+                 project_id, score, round_no)
+        try:
+            messages = [
+                {"role": "user", "content": build_prompt},
+                {"role": "assistant", "content": html},
+                {"role": "user", "content": skill.build_iteration_prompt(instruction)},
+            ]
+            html = _extract_html(_call_claude(messages, system=skill.MOTION_WEBSITE_SKILL))
+            storage.write_site(project_id, html)
+        except Exception:
+            log.exception("project %s: improvement round %d failed — shipping "
+                          "previous version", project_id, round_no)
+            break
+    return html
+
+
 def _run_build(project_id: str, fresh_concept: bool) -> None:
     import time
 
@@ -188,6 +232,11 @@ def _run_build(project_id: str, fresh_concept: bool) -> None:
         html = _extract_html(_call_claude(
             [{"role": "user", "content": prompt}], system=skill.MOTION_WEBSITE_SKILL,
         ))
+        storage.write_site(project_id, html)
+
+        if config.CRITIQUE_ROUNDS > 0:
+            html = _refine(project_id, project["brief"], concept, photos, videos, html)
+
         html = _apply_shadow(project_id, project["brief"], concept, html,
                              fresh=fresh_concept)
         storage.write_site(project_id, html)

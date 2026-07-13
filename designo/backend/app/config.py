@@ -37,6 +37,11 @@ PHOTO_EDIT_MODEL = os.getenv("DESIGNO_PHOTO_EDIT_MODEL", "fal-ai/nano-banana/edi
 # Text-to-image for creative-director artwork commissions (requires FAL_KEY)
 ARTWORK_MODEL = os.getenv("DESIGNO_ARTWORK_MODEL", "fal-ai/flux-pro/v1.1")
 
+# Post-build design critique loop: after generation the site is screenshot,
+# judged by a vision "Awwwards juror", and improved. 0 rounds disables it.
+CRITIQUE_ROUNDS = int(os.getenv("DESIGNO_CRITIQUE_ROUNDS", "2"))
+CRITIQUE_TARGET = float(os.getenv("DESIGNO_CRITIQUE_TARGET", "8.5"))
+
 # --- Lead generation ---
 # Apify Google Maps scraper (paid) — finds businesses without websites.
 APIFY_TOKEN = os.getenv("APIFY_TOKEN", "")

@@ -41,6 +41,81 @@ QUALITY_SUFFIX = (
     "no gibberish lettering."
 )
 
+ARTWORK_QA_SKILL = """\
+You are the art director doing final QA on an AI-commissioned image before it
+ships on a premium client website. You are shown the image and the commission
+it was generated from. Be brutal — a flawed image damages the studio's name.
+
+Fail the image if you see ANY of:
+- garbled or nonsensical lettering/signage anywhere in the frame
+- warped anatomy, impossible geometry, melted or smeared objects
+- mushy, low-detail areas that read as obvious AI output at a glance
+- a mood/subject that contradicts the commission
+- heavy 'AI gloss' (plastic skin, over-smooth surfaces, fake HDR glow)
+
+Minor softness in deep shadow or bokeh is acceptable — this is cinematic
+photography, not product photography.
+
+Respond with ONLY a valid JSON object:
+{
+  "pass": true | false,
+  "issues": ["short, specific defects (empty when pass)"],
+  "revised_prompt": "when failing: the full rewritten generation prompt that
+    would avoid these defects (keep the original scene and mood, add negative
+    guidance like 'no signage' if lettering was the problem). Empty when pass."
+}
+"""
+
+
+def _qa_review(image_bytes: bytes, commission_prompt: str, role: str) -> dict:
+    """Vision QA of a rendered commission. Returns {pass, issues, revised_prompt}."""
+    import base64
+
+    from . import generator  # lazy: generator imports artwork at module level
+
+    return generator.call_claude_json(
+        [{
+            "role": "user",
+            "content": [
+                {"type": "image", "source": {
+                    "type": "base64", "media_type": "image/jpeg",
+                    "data": base64.b64encode(image_bytes).decode(),
+                }},
+                {"type": "text", "text": (
+                    f"Role on the site: {role}\n\n"
+                    f"Commission prompt:\n{commission_prompt}\n\n"
+                    "QA this image now. Respond with ONLY the JSON object."
+                )},
+            ],
+        }],
+        system=ARTWORK_QA_SKILL,
+        max_tokens=1000,
+    )
+
+
+def render_with_qa(prompt: str, aspect: str, role: str) -> tuple[bytes, int, int]:
+    """Render a commission, QA it, and re-roll once with a corrected prompt
+    if the art director fails it. Returns the best attempt."""
+    data, w, h = _render(prompt, aspect)
+    try:
+        report = _qa_review(data, prompt, role)
+    except Exception:
+        log.exception("artwork QA failed (shipping unreviewed image)")
+        return data, w, h
+    if report.get("pass"):
+        return data, w, h
+
+    issues = ", ".join(str(i) for i in (report.get("issues") or [])[:4])
+    revised = (report.get("revised_prompt") or "").strip() or prompt
+    log.info("artwork QA failed (%s) — re-rolling: %s", role, issues)
+    try:
+        data2, w2, h2 = _render(revised, aspect)
+    except Exception:
+        log.exception("artwork re-roll failed (keeping first attempt)")
+        return data, w, h
+    # Ship the re-roll — even if imperfect, it addressed the named defects.
+    return data2, w2, h2
+
 
 def enabled() -> bool:
     return bool(config.FAL_KEY)
@@ -149,7 +224,7 @@ def generate_commissions(project_id: str, commissions: list[dict]) -> list[dict]
             tag = "hero"
             hero_assigned = True
         try:
-            data, w, h = _render(prompt, aspect)
+            data, w, h = render_with_qa(prompt, aspect, role)
             filename = storage.save_photo_bytes(project_id, data, f"artwork-{i + 1}.jpg")
             photo = db.add_photo(
                 project_id, filename, f"ai-artwork-{i + 1}.jpg", tag,
