@@ -88,20 +88,86 @@ def call_claude_json(messages: list[dict], system: str, max_tokens: int | None =
     raise ValueError(f"model returned malformed JSON after {attempts} attempts: {last_exc}")
 
 
+# Prompt-cache breakpoint. 1h TTL covers a full build+critique loop (~20min);
+# cache reads are ~0.1× input price, so improvement rounds stop re-paying for
+# the static skill + build prompt.
+_CACHE = {"type": "ephemeral", "ttl": "1h"}
+
+
+def _text_block(text: str, *, cache: bool = False) -> dict:
+    block: dict = {"type": "text", "text": text}
+    if cache:
+        block["cache_control"] = dict(_CACHE)
+    return block
+
+
+def _with_cache_breakpoints(messages: list[dict]) -> list[dict]:
+    """Mark every message except the final one for caching.
+
+    Multi-turn improve calls look like [build_prompt, prior_html, instruction].
+    Caching the prefix means round 2+ only pay full price for the new HTML +
+    the new instruction — the skill and brief/manifest reuse at ~10% cost.
+    Anthropic allows ≤4 explicit breakpoints; we use system + up to 3 here.
+    """
+    out: list[dict] = []
+    n = len(messages)
+    for i, msg in enumerate(messages):
+        content = msg["content"]
+        if isinstance(content, str):
+            blocks = [{"type": "text", "text": content}]
+        else:
+            # Vision / mixed content — copy so we don't mutate the caller's list.
+            blocks = [dict(b) if isinstance(b, dict) else b for b in content]
+        if n > 1 and i < n - 1 and blocks and isinstance(blocks[-1], dict):
+            blocks[-1] = {**blocks[-1], "cache_control": dict(_CACHE)}
+        out.append({"role": msg["role"], "content": blocks})
+    return out
+
+
+def _log_cache_usage(usage, model: str) -> None:
+    if usage is None:
+        return
+    created = getattr(usage, "cache_creation_input_tokens", 0) or 0
+    read = getattr(usage, "cache_read_input_tokens", 0) or 0
+    inp = getattr(usage, "input_tokens", 0) or 0
+    out = getattr(usage, "output_tokens", 0) or 0
+    if created or read:
+        log.info("claude cache [%s]: read=%d write=%d input=%d output=%d",
+                 model, read, created, inp, out)
+    else:
+        log.info("claude usage [%s]: input=%d output=%d (no cache hit)",
+                 model, inp, out)
+
+
 def _call_claude(messages: list[dict], system: str, max_tokens: int | None = None,
                  model: str | None = None) -> str:
     if not config.ANTHROPIC_API_KEY:
         raise RuntimeError("ANTHROPIC_API_KEY is not configured")
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    use_model = model or config.LLM_MODEL
+    cache_on = config.PROMPT_CACHE
+
+    if cache_on and system:
+        system_arg: str | list = [_text_block(system, cache=True)]
+        msgs = _with_cache_breakpoints(messages)
+    else:
+        system_arg = system
+        msgs = messages
+
     chunks: list[str] = []
     with client.messages.stream(
-        model=model or config.LLM_MODEL,
+        model=use_model,
         max_tokens=max_tokens or config.LLM_MAX_TOKENS,
-        system=system,
-        messages=messages,
+        system=system_arg,
+        messages=msgs,
     ) as stream:
         for text in stream.text_stream:
             chunks.append(text)
+        try:
+            final = stream.get_final_message()
+            _log_cache_usage(getattr(final, "usage", None), use_model)
+        except Exception:
+            log.debug("could not read final message usage", exc_info=True)
     return "".join(chunks)
 
 

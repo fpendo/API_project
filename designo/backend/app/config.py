@@ -25,6 +25,10 @@ LLM_MAX_TOKENS = int(os.getenv("DESIGNO_LLM_MAX_TOKENS", "64000"))
 # visual audit). Defaults to LLM_MODEL; set e.g. a Haiku-class model to cut
 # vision-call costs without touching build quality.
 LLM_SMALL_MODEL = os.getenv("DESIGNO_LLM_SMALL_MODEL", "") or LLM_MODEL
+# Anthropic prompt caching — caches the system skill + multi-turn prefixes so
+# critique improvement rounds re-read them at ~0.1× input price. Disable with
+# DESIGNO_PROMPT_CACHE=0 if a model rejects cache_control.
+PROMPT_CACHE = os.getenv("DESIGNO_PROMPT_CACHE", "1").strip().lower() not in ("0", "false", "no", "off")
 
 # fal.ai (optional AI hero video). Feature is disabled when FAL_KEY is empty.
 FAL_KEY = os.getenv("FAL_KEY", "")
