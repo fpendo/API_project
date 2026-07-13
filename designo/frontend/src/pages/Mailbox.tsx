@@ -323,7 +323,7 @@ function SettingsPanel({ onSaved }: { onSaved: () => void }) {
 
   return (
     <div className="glass-card p-6 mb-8">
-      <p className="font-display font-semibold mb-1">Connect your Designo email</p>
+      <p className="font-display font-semibold mb-1">Connect your Twin Native email</p>
       <p className="text-text-muted text-sm mb-5">
         IMAP details for the mailbox that receives replies (the reply-to address on your pitch emails).
         For Gmail use an app password; for most providers the host is imap.yourprovider.com, port 993.

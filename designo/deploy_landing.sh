@@ -6,7 +6,7 @@
 # The generated index.html is served at exactly /designo/ (nginx exact-match
 # location); its relative assets (photos/, videos/, shadow files) are copied
 # into /var/www/designo/ so they resolve under /designo/. The React SPA keeps
-# serving /designo/login and all studio routes via the prefix location.
+# serving /login and all studio routes via the prefix location.
 set -euo pipefail
 
 PROJECT_ID="${1:?usage: deploy_landing.sh <project_id>}"
@@ -26,7 +26,7 @@ src, dst = sys.argv[1], sys.argv[2]
 html = open(src, encoding="utf-8").read()
 
 # Remove any existing model-generated login link first (we replace it)
-html = re.sub(r'<a[^>]*href="/designo/login"[^>]*>.*?</a>', '', html, flags=re.S)
+html = re.sub(r'<a[^>]*href="/login"[^>]*>.*?</a>', '', html, flags=re.S)
 
 css = """
 /* === Fixed studio login button (injected by deploy_landing.sh) === */
@@ -57,7 +57,7 @@ css = """
 """
 
 html = re.sub(r'(</style>)', css + r'\1', html, count=1)
-btn = '\n<a id="studio-login-btn" href="/designo/login" aria-label="Studio login">Log in</a>\n'
+btn = '\n<a id="studio-login-btn" href="/login" aria-label="Studio login">Log in</a>\n'
 html = re.sub(r'(<body[^>]*>)', r'\1' + btn, html, count=1)
 
 open(dst, "w", encoding="utf-8").write(html)

@@ -11,7 +11,7 @@ export function Logo({ size = 'md' }: { size?: 'sm' | 'md' }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5h4.5a6.5 6.5 0 0 1 0 13H8V5z" />
         </svg>
       </div>
-      <span className="font-display font-semibold text-lg tracking-tight">Designo</span>
+      <span className="font-display font-semibold text-lg tracking-tight">Twin Native</span>
     </div>
   )
 }
@@ -32,7 +32,7 @@ export default function Shell({ children, wide = false }: { children: ReactNode;
       <div className="relative z-10 flex flex-col min-h-screen">
         <header className="border-b border-border bg-background-glass backdrop-blur-xl sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link to="/" aria-label="Designo home"><Logo /></Link>
+            <Link to="/" aria-label="Twin Native home"><Logo /></Link>
             <nav className="flex items-center gap-2">
               <Link to="/sites" className="px-4 py-2 text-text-muted hover:text-text-primary hover:bg-background-elevated rounded-lg transition-all duration-200 text-sm">
                 My Sites
@@ -68,7 +68,7 @@ export default function Shell({ children, wide = false }: { children: ReactNode;
 
         <footer className="border-t border-border">
           <div className="max-w-7xl mx-auto px-6 py-6 text-center text-text-muted text-sm">
-            <p>Designo · Motion websites from a brief and your photos</p>
+            <p>Twin Native · Motion websites from a brief and your photos</p>
           </div>
         </footer>
       </div>

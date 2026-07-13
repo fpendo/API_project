@@ -313,7 +313,7 @@ function DiscoveryPanel({ config, job, onJob, onImported }: {
 
       {!sourceReady && config && (
         <p className="text-text-muted text-xs mt-3">
-          This source needs <code className="font-mono">{keyName}</code> in the Designo backend
+          This source needs <code className="font-mono">{keyName}</code> in the Twin Native backend
           <code className="font-mono"> .env</code>. CSV import works without any keys.
         </p>
       )}

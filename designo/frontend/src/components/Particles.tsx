@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 interface P { x: number; y: number; r: number; vx: number; vy: number; a: number }
 
-/** Subtle drifting particle field — the landing page demos the effects Designo sells. */
+/** Subtle drifting particle field — the landing page demos the effects Twin Native sells. */
 export default function Particles() {
   const ref = useRef<HTMLCanvasElement>(null)
 

@@ -282,7 +282,7 @@ function HeroVideoPanel({ project, config, onStarted, generating }: {
       {!config?.video_enabled ? (
         <p className="text-text-muted text-sm">
           Optional paid upgrade: animate a photo into a cinematic hero clip.
-          Add a <code className="font-mono text-xs">FAL_KEY</code> to the Designo backend
+          Add a <code className="font-mono text-xs">FAL_KEY</code> to the Twin Native backend
           <code className="font-mono text-xs"> .env</code> to switch this on.
         </p>
       ) : (

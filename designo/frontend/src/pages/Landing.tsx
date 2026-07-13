@@ -79,7 +79,7 @@ export default function Landing() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto mb-12"
             >
-              Designo turns a short questionnaire and your tagged photography into a
+              Twin Native turns a short questionnaire and your tagged photography into a
               scroll-driven motion website — film grain, particles, glass and
               choreography included.
             </motion.p>
@@ -175,7 +175,7 @@ export default function Landing() {
               Ready when you are.
             </h2>
             <p className="text-text-secondary mb-10 max-w-lg mx-auto">
-              Five minutes of questions, a handful of photos, and Designo does the rest.
+              Five minutes of questions, a handful of photos, and Twin Native does the rest.
             </p>
             <Link to="/create" className="btn-primary text-lg !px-10 !py-4">
               Create Website
@@ -185,7 +185,7 @@ export default function Landing() {
 
         <footer className="border-t border-border">
           <div className="max-w-7xl mx-auto px-6 py-6 text-center text-text-muted text-sm">
-            <p>Designo · Motion websites from a brief and your photos</p>
+            <p>Twin Native · Motion websites from a brief and your photos</p>
           </div>
         </footer>
       </div>

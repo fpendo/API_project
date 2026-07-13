@@ -12,7 +12,7 @@ const pillars = [
   },
   {
     title: 'Built for the agent economy',
-    body: 'Search is changing. When customers ask ChatGPT or Google\u2019s AI to recommend a business, most websites are invisible to them. Every Designo site ships with a machine-readable shadow site — so AI assistants can read, understand and recommend you from day one.',
+    body: 'Search is changing. When customers ask ChatGPT or Google\u2019s AI to recommend a business, most websites are invisible to them. Every Twin Native site ships with a machine-readable shadow site — so AI assistants can read, understand and recommend you from day one.',
   },
   {
     title: 'Visible on Google, provably',
@@ -64,7 +64,7 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="text-accent-secondary font-mono text-sm tracking-[0.3em] uppercase mb-6"
             >
-              Designo Studio
+              Twin Native
             </motion.p>
             <motion.h1
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
@@ -163,7 +163,7 @@ export default function Home() {
                   the right people, with the right message, measurably.
                 </p>
                 <p>
-                  Designo is that same discipline applied to local business. Every site we ship is
+                  Twin Native is that same discipline applied to local business. Every site we ship is
                   designed like a brand film, engineered like a product — and instrumented so you can
                   watch it earn its keep, one Monday-morning report at a time.
                 </p>
@@ -186,7 +186,7 @@ export default function Home() {
               Your customers will soon ask an AI before they ask Google. We make sure the answer is you.
             </p>
             <p className="text-text-muted text-sm">
-              Designo works by invitation — if we&rsquo;ve written to you, your website is already built.
+              Twin Native works by invitation — if we&rsquo;ve written to you, your website is already built.
               Check your email for your private preview link.
             </p>
           </motion.div>
@@ -194,7 +194,7 @@ export default function Home() {
 
         <footer className="border-t border-border">
           <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between flex-wrap gap-3 text-text-muted text-sm">
-            <p>Designo Studio · Part of the Nemx Group</p>
+            <p>Twin Native · Part of the Nemx Group</p>
             <Link to="/login" className="hover:text-text-primary transition-colors">Studio login</Link>
           </div>
         </footer>

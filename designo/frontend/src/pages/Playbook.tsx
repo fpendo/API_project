@@ -226,7 +226,7 @@ export default function Playbook() {
           <Arrow />
           <Stage phase="close" num="12" title="Live & reporting" sub="The ongoing relationship the £59/month pays for."
             items={[
-              'Site hosted & maintained by Designo',
+              'Site hosted & maintained by Twin Native',
               'Weekly SEO + ASO report every Monday',
               'Google visibility and AI-agent visibility, both measured',
             ]} />
@@ -268,7 +268,7 @@ export default function Playbook() {
             testimonials. The rebuild feels like <em>their business upgraded</em>, not a generic template for their trade.
           </p>
           <p>
-            The build itself is the standard two-stage Designo pipeline: a concept stage sets the creative direction and
+            The build itself is the standard two-stage Twin Native pipeline: a concept stage sets the creative direction and
             commissions 6-10 AI artworks (no client photos exist yet), then the site stage produces a scroll-driven,
             cinematic single-file website. Every build also ships the <strong className="text-text-primary">shadow site</strong> —
             llms.txt, agent.json and schema.org JSON-LD — so the business is legible to AI assistants from day one. That's
@@ -313,7 +313,7 @@ export default function Playbook() {
           <p>
             The welcome pack confirms payment and asks for exactly one thing: a first and second choice of domain name.
             Domain costs are <strong className="text-text-primary">absorbed, never itemised</strong> — the first year lives inside
-            the £695, renewals inside the £59/month — so the client never sees a third bill. Designo registers and connects
+            the £695, renewals inside the £59/month — so the client never sees a third bill. Twin Native registers and connects
             the domain, the site goes live within 24 hours, and Search Console indexing is set up.
           </p>
           <p>
@@ -345,7 +345,7 @@ export default function Playbook() {
             "find me a local tradesperson" questions, and they can only recommend businesses they can read.
           </p>
           <p>
-            Every Designo site ships a machine-readable shadow layer: <code className="text-text-primary">llms.txt</code> for
+            Every Twin Native site ships a machine-readable shadow layer: <code className="text-text-primary">llms.txt</code> for
             language models, <code className="text-text-primary">agent.json</code> describing services and actions (request a
             quote, call), a semantic microdata page, and schema.org JSON-LD in the head. Most local businesses — and most
             web agencies — have none of this. The weekly report then proves it's working: AI crawler visits, AI-referred

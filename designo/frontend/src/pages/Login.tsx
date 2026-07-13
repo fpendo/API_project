@@ -36,7 +36,7 @@ export default function Login() {
         </div>
         <form onSubmit={submit} className="glass-card p-8">
           <h1 className="font-display font-semibold text-xl mb-1">Studio login</h1>
-          <p className="text-text-muted text-sm mb-6">The studio is for the Designo team.</p>
+          <p className="text-text-muted text-sm mb-6">The studio is for the Twin Native team.</p>
           <label className="block mb-4">
             <span className="text-text-muted text-xs uppercase tracking-wider block mb-1.5">Password</span>
             <input
@@ -54,7 +54,7 @@ export default function Login() {
           </button>
         </form>
         <p className="text-center text-text-muted text-sm mt-6">
-          <Link to="/" className="hover:text-text-primary transition-colors">← Back to designo.studio</Link>
+          <Link to="/" className="hover:text-text-primary transition-colors">← Back to twinnative.com</Link>
         </p>
       </div>
     </div>

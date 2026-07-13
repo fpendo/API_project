@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/designo/',
+  base: '/',
   server: {
     port: 3020,
     proxy: {
