@@ -51,6 +51,12 @@ Look specifically for these defects:
   ideas; motion that decorates instead of narrates
 - layout faults: clipped or overlapping text, images stretched or letterboxed
   badly, misaligned grids, content wider than the viewport (see evidence)
+- SUPERIMPOSED CONTENT (critical): two unrelated blocks of copy or UI
+  occupying the same area of a frame — e.g. one section's text readable
+  through another's, or several stacked "cards" all visible at once. This is
+  a broken pinned/crossfade transition, not a style choice. Compare frames:
+  if content from an earlier frame is still visible underneath a later
+  frame's content, fail it as critical.
 - mobile neglect: cramped type, broken pinned sections, horizontal scroll
 - any console errors = automatic cap of 7
 
@@ -105,7 +111,7 @@ def capture(project_id: str) -> dict:
 
             total = page.evaluate("document.body.scrollHeight")
             vh = DESKTOP["height"]
-            depths = [0, 0.28, 0.55, 0.8]
+            depths = [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9]
             for i, frac in enumerate(depths):
                 target = int(max(0, (total - vh) * frac))
                 # wheel (not scrollTo) so Lenis + ScrollTrigger animate naturally
@@ -172,7 +178,7 @@ def review(project_id: str) -> dict | None:
     try:
         report = generator.call_claude_json(
             [{"role": "user", "content": content}],
-            system=JUROR_SKILL, max_tokens=2000,
+            system=JUROR_SKILL, max_tokens=2000, model=config.LLM_SMALL_MODEL,
         )
     except Exception:
         log.exception("critique: juror call failed for project %s", project_id)

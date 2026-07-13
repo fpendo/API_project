@@ -90,6 +90,7 @@ def _qa_review(image_bytes: bytes, commission_prompt: str, role: str) -> dict:
         }],
         system=ARTWORK_QA_SKILL,
         max_tokens=1000,
+        model=config.LLM_SMALL_MODEL,
     )
 
 

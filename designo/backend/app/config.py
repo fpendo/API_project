@@ -21,6 +21,10 @@ PORT = int(os.getenv("DESIGNO_PORT", "8620"))
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 LLM_MODEL = os.getenv("DESIGNO_LLM_MODEL", "claude-sonnet-4-5")
 LLM_MAX_TOKENS = int(os.getenv("DESIGNO_LLM_MAX_TOKENS", "64000"))
+# Cheaper model for small judgement calls (critique juror, artwork QA,
+# visual audit). Defaults to LLM_MODEL; set e.g. a Haiku-class model to cut
+# vision-call costs without touching build quality.
+LLM_SMALL_MODEL = os.getenv("DESIGNO_LLM_SMALL_MODEL", "") or LLM_MODEL
 
 # fal.ai (optional AI hero video). Feature is disabled when FAL_KEY is empty.
 FAL_KEY = os.getenv("FAL_KEY", "")

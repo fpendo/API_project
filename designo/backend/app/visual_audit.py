@@ -19,7 +19,7 @@ Cost: one screenshot (~5-10s) + one small vision call (~$0.01-0.03) per site.
 import base64
 import logging
 
-from . import generator
+from . import config, generator
 
 log = logging.getLogger("designo.visual_audit")
 
@@ -170,6 +170,7 @@ def review(url: str, _retry: bool = True) -> dict | None:
             }],
             system=CREATIVE_DIRECTOR_PROMPT,
             max_tokens=1000,
+            model=config.LLM_SMALL_MODEL,
         )
     except Exception as exc:
         log.warning("visual_audit: review failed for %s: %s", url, exc)

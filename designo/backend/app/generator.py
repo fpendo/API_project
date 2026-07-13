@@ -67,12 +67,12 @@ def _extract_json(text: str) -> dict:
 
 
 def call_claude_json(messages: list[dict], system: str, max_tokens: int | None = None,
-                     attempts: int = 3) -> dict:
+                     attempts: int = 3, model: str | None = None) -> dict:
     """Call Claude expecting JSON; retry on malformed output. Failed raw
     responses are dumped to /tmp/designo_bad_json_*.txt for diagnosis."""
     last_exc: Exception | None = None
     for attempt in range(attempts):
-        raw = _call_claude(messages, system=system, max_tokens=max_tokens)
+        raw = _call_claude(messages, system=system, max_tokens=max_tokens, model=model)
         try:
             return _extract_json(raw)
         except (ValueError, json.JSONDecodeError) as exc:
@@ -88,13 +88,14 @@ def call_claude_json(messages: list[dict], system: str, max_tokens: int | None =
     raise ValueError(f"model returned malformed JSON after {attempts} attempts: {last_exc}")
 
 
-def _call_claude(messages: list[dict], system: str, max_tokens: int | None = None) -> str:
+def _call_claude(messages: list[dict], system: str, max_tokens: int | None = None,
+                 model: str | None = None) -> str:
     if not config.ANTHROPIC_API_KEY:
         raise RuntimeError("ANTHROPIC_API_KEY is not configured")
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
     chunks: list[str] = []
     with client.messages.stream(
-        model=config.LLM_MODEL,
+        model=model or config.LLM_MODEL,
         max_tokens=max_tokens or config.LLM_MAX_TOKENS,
         system=system,
         messages=messages,
